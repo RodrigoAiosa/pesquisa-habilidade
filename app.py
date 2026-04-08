@@ -1,4 +1,6 @@
 import streamlit as st
+import pandas as pd
+from datetime import datetime
 
 # -----------------------------
 # CONFIG
@@ -10,139 +12,165 @@ st.set_page_config(
 )
 
 # -----------------------------
-# LOAD CSS
+# CSS
 # -----------------------------
 def load_css():
-    with open("assets/style.css") as f:
-        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+    try:
+        with open("assets/style.css") as f:
+            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+    except:
+        pass
 
 load_css()
 
 # -----------------------------
-# HEADER (Landing)
+# SESSION STATE
 # -----------------------------
-st.markdown("""
-    <div style="text-align: center; padding: 40px 20px;">
-        <h1>🚀 Avaliação de Engenheiro de IA</h1>
-        <p>Descubra seu nível técnico com base em requisitos reais de mercado</p>
-    </div>
-""", unsafe_allow_html=True)
+if "step" not in st.session_state:
+    st.session_state.step = 1
 
 # -----------------------------
 # DADOS
 # -----------------------------
 requisitos = [
-    "Experiência com LLMs em produção",
-    "Arquitetura de agentes (multiagentes, CrewAI ou similares)",
-    "Experiência com RAG",
-    "Python avançado (POO, clean code)",
+    "LLMs em produção",
+    "Arquitetura de agentes",
+    "RAG",
+    "Python avançado",
     "APIs REST",
     "Integração de sistemas",
-    "Banco de dados (SQL/NoSQL)",
-    "Bancos vetoriais (Pinecone, FAISS, etc.)",
-    "Git e versionamento"
+    "Banco de dados",
+    "Bancos vetoriais",
+    "Git"
 ]
 
 diferenciais = [
-    "Deploy em cloud (Azure ou similar)",
-    "Docker e conteinerização",
-    "Observabilidade (logs, tracing, monitoramento)",
-    "Pipelines de dados (Airflow, Databricks)",
-    "RAG em larga escala"
+    "Cloud (Azure)",
+    "Docker",
+    "Observabilidade",
+    "Pipelines de dados",
+    "RAG em escala"
 ]
 
 soft_skills = [
     "Pensamento analítico",
-    "Traduz negócio em solução técnica",
+    "Traduz negócio",
     "Perfil investigativo",
     "Autonomia",
-    "Boa comunicação"
+    "Comunicação"
 ]
 
 # -----------------------------
-# LAYOUT EM COLUNAS
+# STEP 1 - FORMULÁRIO
 # -----------------------------
-col1, col2, col3 = st.columns(3)
+if st.session_state.step == 1:
 
-# -----------------------------
-# REQUISITOS
-# -----------------------------
-with col1:
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.subheader("✅ Requisitos Obrigatórios")
-    req_checks = [st.checkbox(item, key=f"req_{i}") for i, item in enumerate(requisitos)]
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown("## 🚀 Avaliação de Engenheiro de IA")
+    st.markdown("Preencha seus dados para iniciar:")
 
-# -----------------------------
-# DIFERENCIAIS
-# -----------------------------
-with col2:
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.subheader("🚀 Diferenciais")
-    dif_checks = [st.checkbox(item, key=f"dif_{i}") for i, item in enumerate(diferenciais)]
-    st.markdown('</div>', unsafe_allow_html=True)
+    with st.form("form_usuario"):
+        nome = st.text_input("Nome")
+        email = st.text_input("E-mail")
+        celular = st.text_input("Celular")
 
-# -----------------------------
-# SOFT SKILLS
-# -----------------------------
-with col3:
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.subheader("🧠 Soft Skills")
-    soft_checks = [st.checkbox(item, key=f"soft_{i}") for i, item in enumerate(soft_skills)]
-    st.markdown('</div>', unsafe_allow_html=True)
+        submitted = st.form_submit_button("Continuar")
+
+        if submitted:
+            if nome and email:
+                st.session_state.nome = nome
+                st.session_state.email = email
+                st.session_state.celular = celular
+                st.session_state.step = 2
+                st.rerun()
+            else:
+                st.warning("Preencha pelo menos nome e e-mail")
 
 # -----------------------------
-# BOTÃO
+# STEP 2 - AVALIAÇÃO
 # -----------------------------
-st.markdown("<br>", unsafe_allow_html=True)
+elif st.session_state.step == 2:
 
-if st.button("📊 Calcular Meu Nível"):
+    st.markdown(f"### 👋 Olá, {st.session_state.nome}")
+    st.markdown("Marque suas habilidades:")
 
-    # -----------------------------
-    # SCORE
-    # -----------------------------
-    req_score = sum(req_checks) / len(requisitos)
-    dif_score = sum(dif_checks) / len(diferenciais)
-    soft_score = sum(soft_checks) / len(soft_skills)
+    col1, col2, col3 = st.columns(3)
 
-    score_final = (req_score * 0.6) + (dif_score * 0.25) + (soft_score * 0.15)
+    with col1:
+        st.markdown("### ✅ Requisitos")
+        req_checks = [st.checkbox(item, key=f"req_{i}") for i, item in enumerate(requisitos)]
 
-    # -----------------------------
-    # RESULTADO
-    # -----------------------------
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.subheader("📈 Resultado da Avaliação")
+    with col2:
+        st.markdown("### 🚀 Diferenciais")
+        dif_checks = [st.checkbox(item, key=f"dif_{i}") for i, item in enumerate(diferenciais)]
 
-    st.progress(score_final)
+    with col3:
+        st.markdown("### 🧠 Soft Skills")
+        soft_checks = [st.checkbox(item, key=f"soft_{i}") for i, item in enumerate(soft_skills)]
 
-    colA, colB, colC = st.columns(3)
+    if st.button("📊 Calcular Meu Nível"):
 
-    colA.metric("Requisitos", f"{req_score*100:.1f}%")
-    colB.metric("Diferenciais", f"{dif_score*100:.1f}%")
-    colC.metric("Soft Skills", f"{soft_score*100:.1f}%")
+        # -----------------------------
+        # SCORE
+        # -----------------------------
+        req_score = sum(req_checks) / len(requisitos)
+        dif_score = sum(dif_checks) / len(diferenciais)
+        soft_score = sum(soft_checks) / len(soft_skills)
 
-    st.markdown(f"### 🎯 Score Final: {score_final*100:.1f}%")
+        score_final = (req_score * 0.6) + (dif_score * 0.25) + (soft_score * 0.15)
 
-    # -----------------------------
-    # CLASSIFICAÇÃO
-    # -----------------------------
-    if req_score < 0.7:
-        st.error("❌ Você ainda não atende aos requisitos mínimos.")
-    elif score_final >= 0.85:
-        st.success("🔥 Forte candidato! Alto nível técnico.")
-    elif score_final >= 0.7:
-        st.warning("👍 Bom candidato, com potencial.")
-    else:
-        st.info("🤔 Perfil intermediário, pode evoluir mais.")
+        st.progress(score_final)
+        st.write(f"### 🎯 Score Final: {score_final*100:.1f}%")
 
-    st.markdown('</div>', unsafe_allow_html=True)
+        # -----------------------------
+        # CLASSIFICAÇÃO
+        # -----------------------------
+        if req_score < 0.7:
+            classificacao = "Reprovado"
+            st.error("❌ Não atende requisitos mínimos")
+        elif score_final >= 0.85:
+            classificacao = "Forte candidato"
+            st.success("🔥 Forte candidato!")
+        elif score_final >= 0.7:
+            classificacao = "Bom candidato"
+            st.warning("👍 Bom candidato")
+        else:
+            classificacao = "Mediano"
+            st.info("🤔 Perfil intermediário")
 
-# -----------------------------
-# FOOTER
-# -----------------------------
-st.markdown("""
-    <hr>
-    <div style="text-align: center; font-size: 14px; color: gray;">
-        Projeto de avaliação técnica • Desenvolvido com Streamlit
-    </div>
-""", unsafe_allow_html=True)
+        # -----------------------------
+        # GERAR EXCEL
+        # -----------------------------
+        dados = {
+            "Nome": st.session_state.nome,
+            "Email": st.session_state.email,
+            "Celular": st.session_state.celular,
+            "Data": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "Score Final (%)": round(score_final * 100, 2),
+            "Classificação": classificacao
+        }
+
+        # Adicionar respostas
+        for i, item in enumerate(requisitos):
+            dados[f"REQ - {item}"] = req_checks[i]
+
+        for i, item in enumerate(diferenciais):
+            dados[f"DIF - {item}"] = dif_checks[i]
+
+        for i, item in enumerate(soft_skills):
+            dados[f"SOFT - {item}"] = soft_checks[i]
+
+        df = pd.DataFrame([dados])
+
+        file_name = f"avaliacao_{st.session_state.nome.replace(' ', '_')}.xlsx"
+        df.to_excel(file_name, index=False)
+
+        # -----------------------------
+        # DOWNLOAD
+        # -----------------------------
+        with open(file_name, "rb") as f:
+            st.download_button(
+                label="📥 Baixar Resultado em Excel",
+                data=f,
+                file_name=file_name,
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
