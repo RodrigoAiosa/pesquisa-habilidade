@@ -17,9 +17,29 @@ with open("style.css") as f:
 # Dados das áreas de BI (exemplo reduzido)
 bi_areas = {
     "Análise de Dados": {
-        "📌 Requisitos": ["SQL", "Python", "Power BI"],
-        "🚀 Diferenciais": ["Machine Learning", "ETL"],
-        "🧠 Soft Skills": ["Comunicação", "Liderança"]
+        "📌 Requisitos": ["SQL", "Python", "Excel Avançado", "Power BI"],
+        "🚀 Diferenciais": ["Estatística", "Storytelling com Dados", "ETL"],
+        "🧠 Soft Skills": ["Comunicação", "Pensamento Analítico"]
+    },
+    "Business Intelligence (BI)": {
+        "📌 Requisitos": ["Power BI", "Modelagem de Dados", "DAX", "SQL"],
+        "🚀 Diferenciais": ["Data Warehouse", "ETL", "Governança de Dados"],
+        "🧠 Soft Skills": ["Visão de Negócio", "Organização"]
+    },
+    "Engenharia de Dados": {
+        "📌 Requisitos": ["Python", "SQL", "ETL", "Banco de Dados"],
+        "🚀 Diferenciais": ["Spark", "Airflow", "Cloud (AWS/GCP/Azure)"],
+        "🧠 Soft Skills": ["Raciocínio Lógico", "Resolução de Problemas"]
+    },
+    "Ciência de Dados": {
+        "📌 Requisitos": ["Python", "Estatística", "Machine Learning"],
+        "🚀 Diferenciais": ["Deep Learning", "NLP", "MLOps"],
+        "🧠 Soft Skills": ["Curiosidade", "Pensamento Crítico"]
+    },
+    "Analytics Engineer": {
+        "📌 Requisitos": ["SQL", "dbt", "Modelagem de Dados"],
+        "🚀 Diferenciais": ["Data Warehouse", "Versionamento (Git)"],
+        "🧠 Soft Skills": ["Organização", "Documentação"]
     }
 }
 
