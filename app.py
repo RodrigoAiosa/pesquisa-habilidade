@@ -1,10 +1,9 @@
 import streamlit as st
 import pandas as pd
 from io import BytesIO
-import hashlib
 
 from validators import validar_email, validar_celular
-from google_api import salvar_google_sheets, salvar_resumo_google_sheets, buscar_email_existente
+from google_api import salvar_google_sheets, salvar_resumo_google_sheets
 
 
 # ==============================
@@ -16,7 +15,6 @@ st.set_page_config(
     layout="centered"
 )
 
-
 # ==============================
 # CSS
 # ==============================
@@ -25,7 +23,7 @@ with open("style.css") as f:
 
 
 # ==============================
-# ÁREAS
+# ÁREAS DE DADOS
 # ==============================
 bi_areas = {
     "Análise de Dados": {
@@ -40,17 +38,17 @@ bi_areas = {
     },
     "Engenharia de Dados": {
         "📌 Requisitos": ["Python", "SQL", "ETL", "Banco de Dados"],
-        "🚀 Diferenciais": ["Spark", "Airflow", "Cloud"],
-        "🧠 Soft Skills": ["Lógica", "Resolução de Problemas"]
+        "🚀 Diferenciais": ["Spark", "Airflow", "Cloud (AWS/GCP/Azure)"],
+        "🧠 Soft Skills": ["Raciocínio Lógico", "Resolução de Problemas"]
     },
     "Ciência de Dados": {
-        "📌 Requisitos": ["Python", "Estatística", "ML"],
+        "📌 Requisitos": ["Python", "Estatística", "Machine Learning"],
         "🚀 Diferenciais": ["Deep Learning", "NLP", "MLOps"],
         "🧠 Soft Skills": ["Curiosidade", "Pensamento Crítico"]
     },
     "Analytics Engineer": {
-        "📌 Requisitos": ["SQL", "dbt", "Modelagem"],
-        "🚀 Diferenciais": ["Data Warehouse", "Git"],
+        "📌 Requisitos": ["SQL", "dbt", "Modelagem de Dados"],
+        "🚀 Diferenciais": ["Data Warehouse", "Versionamento (Git)"],
         "🧠 Soft Skills": ["Organização", "Documentação"]
     }
 }
@@ -62,25 +60,22 @@ bi_areas = {
 if "etapa" not in st.session_state:
     st.session_state.etapa = 1
 
-if "dados" not in st.session_state:
-    st.session_state.dados = {}
+if "dados_candidato" not in st.session_state:
+    st.session_state.dados_candidato = {}
 
-if "skills" not in st.session_state:
-    st.session_state.skills = {}
+if "habilidades_selecionadas" not in st.session_state:
+    st.session_state.habilidades_selecionadas = {}
 
-if "finalizado" not in st.session_state:
-    st.session_state.finalizado = False
-
-if "processando" not in st.session_state:
-    st.session_state.processando = False
+if "relatorio_gerado" not in st.session_state:
+    st.session_state.relatorio_gerado = False
 
 
 # ==============================
-# SCORE
+# FUNÇÃO DE SCORE
 # ==============================
-def calcular_score(area, skills):
+def calcular_score(area, habilidades):
     total = sum(len(v) for v in bi_areas[area].values())
-    marcadas = sum(len(v) for v in skills.values())
+    marcadas = sum(len(v) for v in habilidades.values())
     porcentagem = (marcadas / total) * 100 if total > 0 else 0
     return total, marcadas, porcentagem
 
@@ -88,79 +83,113 @@ def calcular_score(area, skills):
 # ==============================
 # EXCEL
 # ==============================
-def gerar_excel(area, dados, skills):
+def gerar_excel(area, dados, habilidades):
 
     detalhes = []
-    for cat, itens in skills.items():
+    for categoria, itens in habilidades.items():
         for item in itens:
-            detalhes.append({"Categoria": cat, "Habilidade": item})
+            detalhes.append({
+                "Categoria": categoria,
+                "Habilidade": item
+            })
 
-    total, marcadas, porcentagem = calcular_score(area, skills)
+    total, marcadas, porcentagem = calcular_score(area, habilidades)
 
     output = BytesIO()
     with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
 
-        pd.DataFrame(detalhes).to_excel(writer, sheet_name="Detalhes", index=False)
+        pd.DataFrame(detalhes).to_excel(
+            writer,
+            sheet_name="Detalhes",
+            index=False
+        )
 
         pd.DataFrame({
-            "Nome": [dados["nome"]],
+            "Nome": [dados.get("nome")],
             "Área": [area],
-            "Marcadas": [marcadas],
+            "Habilidades Marcadas": [marcadas],
             "Total": [total],
             "Conclusão": [f"{porcentagem:.1f}%"]
-        }).to_excel(writer, sheet_name="Resumo", index=False)
+        }).to_excel(
+            writer,
+            sheet_name="Resumo",
+            index=False
+        )
 
     return output.getvalue(), total, marcadas, porcentagem
 
 
 # ==============================
-# TELAS
+# TELA 1
 # ==============================
 if st.session_state.etapa == 1:
 
-    st.title("🚀 Diagnóstico de Carreira")
+    st.title("🚀 Descubra seu nível em Dados")
+    st.markdown("Avalie seu fit para áreas de Dados, BI, Engenharia e IA.")
 
-    with st.form("form"):
+    with st.form("cadastro"):
 
-        nome = st.text_input("Nome")
-        sexo = st.selectbox("Sexo", ["Masculino", "Feminino", "Outro"])
-        email = st.text_input("Email")
-        celular = st.text_input("Celular")
+        nome = st.text_input("Nome completo*")
+        sexo = st.selectbox("Sexo*", ["Masculino", "Feminino", "Outro"])
+        email = st.text_input("E-mail*")
+        celular = st.text_input("Celular (opcional)")
 
-        ok = st.form_submit_button("Iniciar")
+        submit = st.form_submit_button("🚀 Iniciar diagnóstico")
 
-        if ok:
+        if submit:
+
+            erros = []
+
+            if not nome.strip():
+                erros.append("Nome obrigatório")
 
             if not validar_email(email):
-                st.error("Email inválido")
+                erros.append("E-mail inválido")
+
+            if celular and not validar_celular(celular):
+                erros.append("Celular inválido")
+
+            if erros:
+                for e in erros:
+                    st.error(e)
             else:
 
-                # 🔥 CHECK ANTI DUPLICAÇÃO REAL (EMAIL = CHAVE)
-                if buscar_email_existente(email):
-                    st.warning("Esse email já foi registrado. Apenas 1 envio permitido.")
-                else:
+                dados = {
+                    "nome": nome,
+                    "sexo": sexo,
+                    "email": email,
+                    "celular": celular
+                }
 
-                    st.session_state.dados = {
-                        "nome": nome,
-                        "sexo": sexo,
-                        "email": email,
-                        "celular": celular
-                    }
+                salvar_google_sheets(dados)
 
-                    st.session_state.etapa = 2
-                    st.rerun()
+                st.session_state.dados_candidato = dados
+                st.session_state.etapa = 2
+                st.session_state.relatorio_gerado = False
+
+                st.rerun()
 
 
+# ==============================
+# TELA 2
+# ==============================
 elif st.session_state.etapa == 2:
 
-    st.title("📊 Avaliação")
+    st.title("📊 Avaliação de Habilidades")
 
-    dados = st.session_state.dados
+    dados = st.session_state.dados_candidato
+    st.markdown(f"**Candidato:** {dados.get('nome')}")
 
-    area = st.selectbox("Área", list(bi_areas.keys()))
+    area = st.selectbox(
+        "Selecione sua área:",
+        list(bi_areas.keys()),
+        key="area_selecionada"
+    )
 
-    if area not in st.session_state.skills:
-        st.session_state.skills = {k: [] for k in bi_areas[area]}
+    if area not in st.session_state.habilidades_selecionadas:
+        st.session_state.habilidades_selecionadas = {
+            cat: [] for cat in bi_areas[area].keys()
+        }
 
     cols = st.columns(3)
 
@@ -170,50 +199,58 @@ elif st.session_state.etapa == 2:
 
             for item in itens:
                 key = f"{area}_{cat}_{item}"
+
                 checked = st.checkbox(item, key=key)
 
                 if checked:
-                    if item not in st.session_state.skills[cat]:
-                        st.session_state.skills[cat].append(item)
+                    if item not in st.session_state.habilidades_selecionadas[cat]:
+                        st.session_state.habilidades_selecionadas[cat].append(item)
                 else:
-                    if item in st.session_state.skills[cat]:
-                        st.session_state.skills[cat].remove(item)
+                    if item in st.session_state.habilidades_selecionadas[cat]:
+                        st.session_state.habilidades_selecionadas[cat].remove(item)
 
-    if st.button("📥 Gerar Relatório") and not st.session_state.finalizado:
+    col1, col2 = st.columns(2)
 
-        if st.session_state.processando:
-            st.stop()
+    with col1:
+        if st.button("⬅️ Voltar"):
+            st.session_state.etapa = 1
+            st.rerun()
 
-        st.session_state.processando = True
+    with col2:
 
-        try:
-            excel, total, marcadas, porcentagem = gerar_excel(area, dados, st.session_state.skills)
+        # 🔒 BLOQUEIO DUPLO ENVIO
+        if st.session_state.relatorio_gerado:
+            st.success("✔ Relatório já foi gerado e enviado.")
+            st.button("📥 Gerar Relatório", disabled=True)
 
-            resumo = {
-                "nome": dados["nome"],
-                "email": dados["email"],  # 🔥 chave única
-                "area": area,
-                "habilidades": marcadas,
-                "total": total,
-                "conclusao": f"{porcentagem:.1f}%"
-            }
+        else:
+            if st.button("📥 Gerar Relatório"):
 
-            # 🔥 SALVA APENAS 1 LINHA (GARANTIDO NO BACKEND)
-            salvar_google_sheets(dados)
-            salvar_resumo_google_sheets(resumo)
+                excel, total, marcadas, porcentagem = gerar_excel(
+                    area,
+                    st.session_state.dados_candidato,
+                    st.session_state.habilidades_selecionadas
+                )
 
-            st.session_state.finalizado = True
+                resumo = {
+                    "nome": dados.get("nome"),
+                    "area": area,
+                    "habilidades_marcadas": marcadas,
+                    "total": total,
+                    "conclusao": f"{porcentagem:.1f}%"
+                }
 
-            st.success("Registro salvo com sucesso!")
+                salvar_resumo_google_sheets(resumo)
 
-            st.download_button(
-                "Baixar Excel",
-                excel,
-                "relatorio.xlsx",
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            )
+                st.session_state.relatorio_gerado = True
 
-        finally:
-            st.session_state.processando = False
+                st.success("Dados enviados com sucesso!")
 
-        st.rerun()
+                st.download_button(
+                    "⬇️ Baixar Excel",
+                    excel,
+                    "relatorio_habilidades.xlsx",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                )
+
+                st.rerun()
