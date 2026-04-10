@@ -1,61 +1,153 @@
-/* 🌌 Fundo geral */
+/* ==============================
+🌌 BASE / FUNDO
+============================== */
+html, body, [data-testid="stAppViewContainer"] {
+    height: 100%;
+}
+
 body {
     background: linear-gradient(135deg, #0f0f0f, #1a0f2e);
     color: #ffffff;
     font-family: 'Segoe UI', sans-serif;
 }
 
-/* Container central */
+
+/* ==============================
+🎯 CONTAINER CENTRAL (LANDING)
+============================== */
 .block-container {
-    background: rgba(255, 255, 255, 0.03);
-    padding: 2rem;
-    border-radius: 16px;
-    box-shadow: 0 0 40px rgba(138, 43, 226, 0.2);
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 2.5rem;
+    padding-top: 6vh;
+    padding-bottom: 6vh;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 18px;
+
+    box-shadow: 
+        0 0 40px rgba(138, 43, 226, 0.15),
+        0 0 80px rgba(138, 43, 226, 0.05);
 }
 
-/* Títulos */
-h1, h2, h3 {
+
+/* ==============================
+🧠 TÍTULOS / TEXTOS
+============================== */
+h1 {
+    text-align: center;
+    color: #c77dff;
+    font-size: 2.2rem;
+    margin-bottom: 0.5rem;
+}
+
+h2, h3 {
+    text-align: center;
     color: #c77dff;
 }
 
-/* Inputs */
+p {
+    text-align: center;
+    color: #cccccc;
+    font-size: 0.95rem;
+}
+
+
+/* ==============================
+🧾 INPUTS / SELECT
+============================== */
 .stTextInput>div>div>input,
 .stSelectbox>div>div>select {
     background-color: #1e1e2f;
     color: white;
     border: 1px solid #6a0dad;
-    border-radius: 8px;
+    border-radius: 10px;
+    padding: 10px;
+    transition: 0.2s;
 }
 
-/* Botões */
+.stTextInput>div>div>input:focus,
+.stSelectbox>div>div>select:focus {
+    border: 1px solid #9d4edd;
+    box-shadow: 0 0 8px rgba(157, 78, 221, 0.6);
+}
+
+
+/* ==============================
+🔘 BOTÕES
+============================== */
 .stButton>button {
+    width: 100%;
     background: linear-gradient(90deg, #6a0dad, #9d4edd);
     color: white;
-    border-radius: 8px;
+    border-radius: 10px;
     border: none;
-    padding: 10px 16px;
+    padding: 12px;
     font-weight: bold;
-    transition: 0.3s;
+    font-size: 0.95rem;
+
+    transition: all 0.25s ease;
 }
 
 .stButton>button:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 15px #9d4edd;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(157, 78, 221, 0.5);
 }
 
-/* Checkbox */
+.stButton>button:active {
+    transform: scale(0.98);
+}
+
+
+/* ==============================
+☑️ CHECKBOX
+============================== */
 .stCheckbox label {
-    color: #ddd;
+    color: #dddddd;
+    font-size: 0.9rem;
 }
 
-/* Alertas */
+
+/* ==============================
+⚠️ ALERTAS
+============================== */
 .stAlert {
     background-color: #2a2a40;
     border-left: 4px solid #9d4edd;
     color: white;
+    border-radius: 8px;
 }
 
-/* Progress bar */
+
+/* ==============================
+📊 PROGRESS BAR
+============================== */
 .stProgress > div > div > div {
-    background-color: #9d4edd;
+    background: linear-gradient(90deg, #6a0dad, #9d4edd);
+    border-radius: 10px;
+}
+
+
+/* ==============================
+📦 SEPARADORES / CTA
+============================== */
+hr {
+    border: none;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #9d4edd, transparent);
+    margin: 2rem 0;
+}
+
+
+/* ==============================
+✨ MICROINTERAÇÕES
+============================== */
+.block-container:hover {
+    box-shadow: 
+        0 0 60px rgba(138, 43, 226, 0.25),
+        0 0 100px rgba(138, 43, 226, 0.08);
 }
