@@ -13,20 +13,37 @@ body {
 
 
 /* ==============================
-📦 CONTAINER CENTRAL
+📦 CONTAINER PRINCIPAL
 ============================== */
 .block-container {
-  max-width: 800px;
+  max-width: 480px;
   margin: 5vh auto;
   padding: 30px;
 
   background-image: linear-gradient(to bottom, #424242, #212121);
 
-  border-radius: 0.6rem;
+  border-radius: 0.8rem;
 
   display: flex;
   flex-direction: column;
   align-items: stretch;
+
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
+}
+
+
+/* ==============================
+📦 FORM INTERNO (ARREDONDADO)
+============================== */
+[data-testid="stForm"] {
+  border-radius: 16px !important;
+  padding: 24px;
+
+  background: rgba(255, 255, 255, 0.03);
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  backdrop-filter: blur(6px);
 }
 
 
@@ -41,14 +58,13 @@ h1, h2, h3 {
 
 
 /* ==============================
-📏 PADRÃO GLOBAL DE INPUT (CORE)
+📏 INPUTS E SELECT (IGUAIS)
 ============================== */
 .stTextInput > div > div,
 .stSelectbox > div > div {
   width: 100%;
 }
 
-/* INPUT e SELECT IGUAIS */
 .stTextInput>div>div>input,
 .stSelectbox>div>div>select {
 
@@ -62,6 +78,8 @@ h1, h2, h3 {
 
   border: none !important;
   border-bottom: 1px solid wheat !important;
+
+  border-radius: 8px !important;
 
   outline: none !important;
 
@@ -77,29 +95,27 @@ h1, h2, h3 {
 .stTextInput>div>div>input:hover,
 .stSelectbox>div>div>select:hover {
   background-color: #424242;
-  border-radius: 6px;
 }
 
 .stTextInput>div>div>input:focus,
 .stSelectbox>div>div>select:focus {
   border-bottom: 1px solid #ffffff;
+  background-color: #2a2a2a;
 }
 
 
 /* ==============================
-🔧 CORREÇÃO DO SELECT (CRÍTICO)
+🔧 CORREÇÃO DO SELECT
 ============================== */
 .stSelectbox div[data-baseweb="select"] {
   background-color: transparent !important;
   border: none !important;
 }
 
-/* Remove borda duplicada */
 .stSelectbox div {
   border: none !important;
 }
 
-/* Alinha conteúdo vertical */
 .stSelectbox > div {
   display: flex;
   align-items: center;
@@ -118,7 +134,7 @@ label {
 
 
 /* ==============================
-📏 ESPAÇAMENTO ENTRE CAMPOS
+📏 ESPAÇAMENTO
 ============================== */
 .stTextInput,
 .stSelectbox {
@@ -127,7 +143,7 @@ label {
 
 
 /* ==============================
-🔘 BOTÃO (PADRÃO UIVERSE)
+🔘 BOTÃO
 ============================== */
 .stButton>button {
   height: 48px;
@@ -137,7 +153,7 @@ label {
   background-color: wheat;
   color: #212121;
 
-  border-radius: 0.5rem;
+  border-radius: 0.6rem;
   border: none;
 
   font-size: 1rem;
@@ -183,8 +199,8 @@ label {
 
 
 /* ==============================
-✨ MICRODETALHES
+✨ MICROINTERAÇÕES
 ============================== */
 .block-container:hover {
-  box-shadow: 0 0 25px rgba(255, 255, 255, 0.05);
+  box-shadow: 0 0 60px rgba(255, 255, 255, 0.05);
 }
