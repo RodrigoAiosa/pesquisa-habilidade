@@ -1,129 +1,97 @@
 /* ==============================
-🌌 FUNDO GERAL
+🎯 SELEÇÃO DE TEXTO
 ============================== */
-body {
-    background: #0f0f0f;
-    color: white;
-    font-family: 'Segoe UI', sans-serif;
+::selection {
+  background-color: gray;
 }
 
 
 /* ==============================
-🎯 CONTAINER ESTILO UIVERSE
+📦 CONTAINER CENTRAL
 ============================== */
-.block-container {
-    max-width: 480px;
-    margin: 5vh auto;
-    padding: 32px 24px;
+.container {
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
-    background: linear-gradient(#212121, #212121) padding-box,
-        linear-gradient(120deg, transparent 25%, #1cb0ff, #40ff99) border-box;
 
-    border: 2px solid transparent;
-    border-radius: 16px;
+/* ==============================
+🧾 FORMULÁRIO
+============================== */
+.form {
+  width: 400px;
+  height: 400px;
 
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+  background-image: linear-gradient(to bottom, #424242, #212121);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  border-radius: 0.5rem;
 }
 
 
 /* ==============================
 🧠 TÍTULO
 ============================== */
-h1, h2, h3 {
-    text-align: center;
-    font-size: 20px;
-    font-weight: 600;
-    color: white;
+.title {
+  color: wheat;
+  margin: 3rem 0;
+  font-size: 2rem;
 }
 
 
 /* ==============================
-🧾 INPUTS (STREAMLIT ADAPTADO)
+✏️ INPUTS
 ============================== */
-.stTextInput>div>div>input,
-.stSelectbox>div>div>select {
+.input {
+  margin: 0.5rem 0;
+  padding: 1rem 0.5rem;
+  width: 20rem;
 
-    color: white;
-    background: transparent;
+  background-color: inherit;
+  color: wheat;
 
-    border: 1px solid #414141;
-    border-radius: 5px;
-    padding: 10px;
+  border: none;
+  outline: none;
+  border-bottom: 1px solid wheat;
 
-    outline: none;
+  transition: all 0.4s ease;
+}
+
+.input:hover {
+  background-color: #424242;
+  border-radius: 0.5rem;
 }
 
 
 /* ==============================
-📦 GRUPOS (SIMULA .form-group)
+🔘 BOTÃO
 ============================== */
-.stTextInput, .stSelectbox {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
+.btn {
+  height: 3rem;
+  width: 20rem;
+  margin-top: 3rem;
+
+  background-color: wheat;
+
+  border-radius: 0.5rem;
+  border: none;
+
+  font-size: 1.2rem;
+  cursor: pointer;
+
+  transition: all 0.4s ease;
+
+  box-shadow:
+    0 0 10px antiquewhite,
+    0 0 10px antiquewhite;
 }
 
-
-/* Labels estilo minimalista */
-label {
-    color: #bdb8b8 !important;
-    font-size: 12px !important;
-}
-
-
-/* ==============================
-🔘 BOTÕES
-============================== */
-.stButton>button {
-    border-radius: 5px;
-    padding: 10px;
-
-    background: #ffffff14;
-    color: #c7c5c5;
-
-    border: 1px solid #414141;
-    width: 100%;
-}
-
-.stButton>button:hover {
-    background: #212121;
-    cursor: pointer;
-}
-
-
-/* ==============================
-☑️ CHECKBOX
-============================== */
-.stCheckbox label {
-    color: #c7c5c5;
-    font-size: 13px;
-}
-
-
-/* ==============================
-⚠️ ALERTAS
-============================== */
-.stAlert {
-    background-color: #212121;
-    border-left: 3px solid #40ff99;
-    color: white;
-}
-
-
-/* ==============================
-📊 PROGRESS BAR
-============================== */
-.stProgress > div > div > div {
-    background: linear-gradient(90deg, #1cb0ff, #40ff99);
-}
-
-
-/* ==============================
-📏 ESPAÇAMENTO GERAL
-============================== */
-section.main > div {
-    display: flex;
-    justify-content: center;
+.btn:hover {
+  background-color: antiquewhite;
+  box-shadow: none;
 }
