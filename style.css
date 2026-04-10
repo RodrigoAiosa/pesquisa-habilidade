@@ -1,6 +1,13 @@
 /* ==============================
-🎯 SELEÇÃO DE TEXTO
+🌌 FUNDO
 ============================== */
+body {
+  background-color: #0f0f0f;
+  color: wheat;
+  font-family: Arial, sans-serif;
+}
+
+/* Seleção */
 ::selection {
   background-color: gray;
 }
@@ -9,8 +16,10 @@
 /* ==============================
 📦 CONTAINER CENTRAL
 ============================== */
-.container {
-  margin: 0 auto;
+.block-container {
+  max-width: 420px;
+  margin: 5vh auto;
+
   display: flex;
   justify-content: center;
   align-items: center;
@@ -18,11 +27,11 @@
 
 
 /* ==============================
-🧾 FORMULÁRIO
+🧾 "FORM" VISUAL
 ============================== */
-.form {
-  width: 400px;
-  height: 400px;
+.block-container > div {
+  width: 100%;
+  padding: 30px;
 
   background-image: linear-gradient(to bottom, #424242, #212121);
 
@@ -37,22 +46,25 @@
 /* ==============================
 🧠 TÍTULO
 ============================== */
-.title {
+h1, h2, h3 {
   color: wheat;
-  margin: 3rem 0;
-  font-size: 2rem;
+  margin-bottom: 20px;
+  font-size: 1.8rem;
+  text-align: center;
 }
 
 
 /* ==============================
-✏️ INPUTS
+✏️ INPUTS (ADAPTADO)
 ============================== */
-.input {
+.stTextInput>div>div>input,
+.stSelectbox>div>div>select {
+
   margin: 0.5rem 0;
   padding: 1rem 0.5rem;
-  width: 20rem;
+  width: 100%;
 
-  background-color: inherit;
+  background-color: transparent;
   color: wheat;
 
   border: none;
@@ -62,21 +74,37 @@
   transition: all 0.4s ease;
 }
 
-.input:hover {
+.stTextInput>div>div>input:hover,
+.stSelectbox>div>div>select:hover {
   background-color: #424242;
   border-radius: 0.5rem;
+}
+
+
+/* Remove fundo branco interno */
+.stTextInput>div>div,
+.stSelectbox>div>div {
+  background: transparent;
+}
+
+
+/* Labels */
+label {
+  color: wheat !important;
+  font-size: 0.85rem !important;
 }
 
 
 /* ==============================
 🔘 BOTÃO
 ============================== */
-.btn {
+.stButton>button {
   height: 3rem;
-  width: 20rem;
-  margin-top: 3rem;
+  width: 100%;
+  margin-top: 2rem;
 
   background-color: wheat;
+  color: #212121;
 
   border-radius: 0.5rem;
   border: none;
@@ -91,7 +119,17 @@
     0 0 10px antiquewhite;
 }
 
-.btn:hover {
+.stButton>button:hover {
   background-color: antiquewhite;
   box-shadow: none;
+}
+
+
+/* ==============================
+⚠️ ALERTAS
+============================== */
+.stAlert {
+  background-color: #212121;
+  border-left: 3px solid wheat;
+  color: wheat;
 }
