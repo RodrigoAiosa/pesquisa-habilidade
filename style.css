@@ -1,79 +1,75 @@
 /* ==============================
-🌌 BASE / FUNDO
+🌌 FUNDO GERAL
 ============================== */
-html, body, [data-testid="stAppViewContainer"] {
-    height: 100%;
-}
-
 body {
-    background: linear-gradient(135deg, #0f0f0f, #1a0f2e);
-    color: #ffffff;
+    background: #0f0f0f;
+    color: white;
     font-family: 'Segoe UI', sans-serif;
 }
 
 
 /* ==============================
-🎯 CONTAINER CENTRAL (LANDING)
+🎯 CONTAINER ESTILO UIVERSE
 ============================== */
 .block-container {
-    max-width: 720px;
-    margin: 0 auto;
-    padding: 2.5rem;
-    padding-top: 6vh;
-    padding-bottom: 6vh;
+    max-width: 480px;
+    margin: 5vh auto;
+    padding: 32px 24px;
+
+    background: linear-gradient(#212121, #212121) padding-box,
+        linear-gradient(120deg, transparent 25%, #1cb0ff, #40ff99) border-box;
+
+    border: 2px solid transparent;
+    border-radius: 16px;
 
     display: flex;
     flex-direction: column;
-    justify-content: center;
-
-    background: rgba(255, 255, 255, 0.04);
-    border-radius: 18px;
-
-    box-shadow: 
-        0 0 40px rgba(138, 43, 226, 0.15),
-        0 0 80px rgba(138, 43, 226, 0.05);
+    gap: 20px;
 }
 
 
 /* ==============================
-🧠 TÍTULOS / TEXTOS
+🧠 TÍTULO
 ============================== */
-h1 {
+h1, h2, h3 {
     text-align: center;
-    color: #c77dff;
-    font-size: 2.2rem;
-    margin-bottom: 0.5rem;
-}
-
-h2, h3 {
-    text-align: center;
-    color: #c77dff;
-}
-
-p {
-    text-align: center;
-    color: #cccccc;
-    font-size: 0.95rem;
+    font-size: 20px;
+    font-weight: 600;
+    color: white;
 }
 
 
 /* ==============================
-🧾 INPUTS / SELECT
+🧾 INPUTS (STREAMLIT ADAPTADO)
 ============================== */
 .stTextInput>div>div>input,
 .stSelectbox>div>div>select {
-    background-color: #1e1e2f;
+
     color: white;
-    border: 1px solid #6a0dad;
-    border-radius: 10px;
+    background: transparent;
+
+    border: 1px solid #414141;
+    border-radius: 5px;
     padding: 10px;
-    transition: 0.2s;
+
+    outline: none;
 }
 
-.stTextInput>div>div>input:focus,
-.stSelectbox>div>div>select:focus {
-    border: 1px solid #9d4edd;
-    box-shadow: 0 0 8px rgba(157, 78, 221, 0.6);
+
+/* ==============================
+📦 GRUPOS (SIMULA .form-group)
+============================== */
+.stTextInput, .stSelectbox {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+
+/* Labels estilo minimalista */
+label {
+    color: #bdb8b8 !important;
+    font-size: 12px !important;
 }
 
 
@@ -81,25 +77,19 @@ p {
 🔘 BOTÕES
 ============================== */
 .stButton>button {
-    width: 100%;
-    background: linear-gradient(90deg, #6a0dad, #9d4edd);
-    color: white;
-    border-radius: 10px;
-    border: none;
-    padding: 12px;
-    font-weight: bold;
-    font-size: 0.95rem;
+    border-radius: 5px;
+    padding: 10px;
 
-    transition: all 0.25s ease;
+    background: #ffffff14;
+    color: #c7c5c5;
+
+    border: 1px solid #414141;
+    width: 100%;
 }
 
 .stButton>button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(157, 78, 221, 0.5);
-}
-
-.stButton>button:active {
-    transform: scale(0.98);
+    background: #212121;
+    cursor: pointer;
 }
 
 
@@ -107,8 +97,8 @@ p {
 ☑️ CHECKBOX
 ============================== */
 .stCheckbox label {
-    color: #dddddd;
-    font-size: 0.9rem;
+    color: #c7c5c5;
+    font-size: 13px;
 }
 
 
@@ -116,10 +106,9 @@ p {
 ⚠️ ALERTAS
 ============================== */
 .stAlert {
-    background-color: #2a2a40;
-    border-left: 4px solid #9d4edd;
+    background-color: #212121;
+    border-left: 3px solid #40ff99;
     color: white;
-    border-radius: 8px;
 }
 
 
@@ -127,27 +116,14 @@ p {
 📊 PROGRESS BAR
 ============================== */
 .stProgress > div > div > div {
-    background: linear-gradient(90deg, #6a0dad, #9d4edd);
-    border-radius: 10px;
+    background: linear-gradient(90deg, #1cb0ff, #40ff99);
 }
 
 
 /* ==============================
-📦 SEPARADORES / CTA
+📏 ESPAÇAMENTO GERAL
 ============================== */
-hr {
-    border: none;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, #9d4edd, transparent);
-    margin: 2rem 0;
-}
-
-
-/* ==============================
-✨ MICROINTERAÇÕES
-============================== */
-.block-container:hover {
-    box-shadow: 
-        0 0 60px rgba(138, 43, 226, 0.25),
-        0 0 100px rgba(138, 43, 226, 0.08);
+section.main > div {
+    display: flex;
+    justify-content: center;
 }
