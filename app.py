@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-import json
+import requests
 from io import BytesIO
 from validators import validar_email, validar_celular
 
@@ -9,7 +9,7 @@ from validators import validar_email, validar_celular
 # ==============================
 st.set_page_config(
     page_title="Diagnóstico de Carreira em Dados",
-    page_icon="🚀",
+    page_icon="📊",
     layout="centered"
 )
 
@@ -20,88 +20,103 @@ with open("style.css") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 # ==============================
-# CARREGAR JSON
+# GOOGLE SHEETS (SUA API)
 # ==============================
-with open("bi_areas.json", "r", encoding="utf-8") as f:
-    bi_areas = json.load(f)
+GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzbWDJx_2TuXXtPnMdn3507XPkcQha_AImQ_lRn14Y3y1Ii_mdTs_ZsdV64vYc6UxWs2w/exec"
+
+def salvar_google_sheets(dados):
+    payload = {
+        "nome": dados["nome"],
+        "sexo": dados["sexo"],
+        "email": dados["email"],
+        "celular": dados["celular"]
+    }
+
+    try:
+        requests.post(GOOGLE_SCRIPT_URL, json=payload, timeout=5)
+    except Exception as e:
+        st.warning("⚠️ Não foi possível salvar no Google Sheets")
+
 
 # ==============================
-# SESSÃO
+# ÁREAS DE DADOS
 # ==============================
+bi_areas = {
+    "Análise de Dados": {
+        "📌 Requisitos": ["SQL", "Python", "Excel Avançado", "Power BI"],
+        "🚀 Diferenciais": ["Estatística", "Storytelling com Dados", "ETL"],
+        "🧠 Soft Skills": ["Comunicação", "Pensamento Analítico"]
+    },
+    "Business Intelligence (BI)": {
+        "📌 Requisitos": ["Power BI", "Modelagem de Dados", "DAX", "SQL"],
+        "🚀 Diferenciais": ["Data Warehouse", "ETL", "Governança de Dados"],
+        "🧠 Soft Skills": ["Visão de Negócio", "Organização"]
+    },
+    "Engenharia de Dados": {
+        "📌 Requisitos": ["Python", "SQL", "ETL", "Banco de Dados"],
+        "🚀 Diferenciais": ["Spark", "Airflow", "Cloud (AWS/GCP/Azure)"],
+        "🧠 Soft Skills": ["Raciocínio Lógico", "Resolução de Problemas"]
+    },
+    "Ciência de Dados": {
+        "📌 Requisitos": ["Python", "Estatística", "Machine Learning"],
+        "🚀 Diferenciais": ["Deep Learning", "NLP", "MLOps"],
+        "🧠 Soft Skills": ["Curiosidade", "Pensamento Crítico"]
+    },
+    "Analytics Engineer": {
+        "📌 Requisitos": ["SQL", "dbt", "Modelagem de Dados"],
+        "🚀 Diferenciais": ["Data Warehouse", "Versionamento (Git)"],
+        "🧠 Soft Skills": ["Organização", "Documentação"]
+    }
+}
+
+# ==============================
+# SESSION STATE
+# ==============================
+if "etapa" not in st.session_state:
+    st.session_state.etapa = 1
+
 if "dados_candidato" not in st.session_state:
     st.session_state.dados_candidato = {}
 
 if "habilidades_selecionadas" not in st.session_state:
     st.session_state.habilidades_selecionadas = {}
 
-if "etapa" not in st.session_state:
-    st.session_state.etapa = 1
-
 # ==============================
-# FUNÇÕES
+# FUNÇÃO EXCEL
 # ==============================
-def calcular_nivel(porcentagem):
-    if porcentagem < 40:
-        return "Júnior"
-    elif porcentagem < 70:
-        return "Pleno"
-    else:
-        return "Sênior"
-
-
-def analisar_resultado(area, habilidades):
-    faltantes_alta = []
-    faltantes_media = []
-
-    for categoria, itens in bi_areas[area].items():
-        for item in itens:
-            if item["nome"] not in habilidades.get(categoria, []):
-                if item["prioridade"] == "alta":
-                    faltantes_alta.append(item["nome"])
-                else:
-                    faltantes_media.append(item["nome"])
-
-    return faltantes_alta, faltantes_media
-
-
-def gerar_excel(area, porcentagem, nivel, faltantes_alta, faltantes_media):
+def gerar_excel():
     dados = st.session_state.dados_candidato
+    habilidades = st.session_state.habilidades_selecionadas
+
+    detalhes = []
+    for categoria, itens in habilidades.items():
+        for item in itens:
+            detalhes.append({"Categoria": categoria, "Habilidade": item})
+
+    total = sum(len(v) for v in bi_areas[st.session_state.area_selecionada].values())
+    marcadas = sum(len(v) for v in habilidades.values())
+    porcentagem = (marcadas / total) * 100
 
     output = BytesIO()
-
-    with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
-
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        pd.DataFrame(detalhes).to_excel(writer, sheet_name='Detalhes', index=False)
         pd.DataFrame({
             "Nome": [dados["nome"]],
-            "Área": [area],
-            "Score (%)": [f"{porcentagem:.1f}%"],
-            "Nível": [nivel]
-        }).to_excel(writer, sheet_name="Resumo", index=False)
-
-        pd.DataFrame({
-            "Prioridade Alta": faltantes_alta
-        }).to_excel(writer, sheet_name="Focar Agora", index=False)
-
-        pd.DataFrame({
-            "Prioridade Média": faltantes_media
-        }).to_excel(writer, sheet_name="Próximos Passos", index=False)
+            "Área": [st.session_state.area_selecionada],
+            "Habilidades Marcadas": [marcadas],
+            "Total": [total],
+            "Conclusão": [f"{porcentagem:.1f}%"]
+        }).to_excel(writer, sheet_name='Resumo', index=False)
 
     return output.getvalue()
 
-
 # ==============================
-# TELA 1 (LANDING)
+# TELA 1 - FORMULÁRIO
 # ==============================
 if st.session_state.etapa == 1:
 
-    st.markdown("""
-    <h1 style='text-align:center;'>🚀 Descubra seu nível em Dados</h1>
-    <p style='text-align:center; color:#ccc;'>
-    Receba um diagnóstico completo da sua carreira em Data Analytics, BI, Engenharia ou Ciência de Dados.
-    </p>
-    """, unsafe_allow_html=True)
-
-    st.title("📝 Começar avaliação")
+    st.title("🚀 Descubra seu nível em Dados")
+    st.markdown("Receba um diagnóstico completo da sua carreira em Data Analytics, BI, Engenharia ou Ciência de Dados.")
 
     with st.form("cadastro"):
         nome = st.text_input("Nome completo*")
@@ -110,6 +125,7 @@ if st.session_state.etapa == 1:
         celular = st.text_input("Celular (opcional)")
 
         if st.form_submit_button("🚀 Iniciar diagnóstico"):
+
             erros = []
 
             if not nome.strip():
@@ -125,114 +141,63 @@ if st.session_state.etapa == 1:
                 for e in erros:
                     st.error(e)
             else:
-                st.session_state.dados_candidato = {
+                dados = {
                     "nome": nome,
                     "sexo": sexo,
                     "email": email,
                     "celular": celular
                 }
+
+                # 🔥 SALVA NO GOOGLE SHEETS
+                salvar_google_sheets(dados)
+
+                st.session_state.dados_candidato = dados
                 st.session_state.etapa = 2
                 st.rerun()
 
-
 # ==============================
-# TELA 2 (AVALIAÇÃO)
+# TELA 2 - HABILIDADES
 # ==============================
 elif st.session_state.etapa == 2:
 
     st.title("📊 Avaliação de Habilidades")
-    st.markdown(f"👤 **{st.session_state.dados_candidato['nome']}**")
+    st.markdown(f"**Candidato:** {st.session_state.dados_candidato['nome']}")
 
-    area = st.selectbox("Escolha sua área:", list(bi_areas.keys()))
+    area = st.selectbox(
+        "Selecione sua área:",
+        list(bi_areas.keys()),
+        key="area_selecionada"
+    )
 
-    # Reset ao trocar área
-    if "area_atual" not in st.session_state or st.session_state.area_atual != area:
-        st.session_state.area_atual = area
+    if area not in st.session_state.habilidades_selecionadas:
         st.session_state.habilidades_selecionadas = {
             cat: [] for cat in bi_areas[area].keys()
         }
 
     cols = st.columns(3)
 
-    categorias_map = {
-        "requisitos": "📌 Requisitos",
-        "diferenciais": "🚀 Diferenciais",
-        "soft_skills": "🧠 Soft Skills"
-    }
-
-    for i, (cat_json, itens) in enumerate(bi_areas[area].items()):
-        cat_nome = categorias_map.get(cat_json, cat_json)
-
+    for i, (cat, itens) in enumerate(bi_areas[area].items()):
         with cols[i]:
-            st.subheader(cat_nome)
-
+            st.subheader(cat)
             for item in itens:
-                nome_item = item["nome"]
-                key = f"{area}_{cat_json}_{nome_item}"
-
-                selecionado = st.checkbox(nome_item, key=key)
-
-                if selecionado:
-                    if nome_item not in st.session_state.habilidades_selecionadas[cat_json]:
-                        st.session_state.habilidades_selecionadas[cat_json].append(nome_item)
+                key = f"{cat}_{item}"
+                if st.checkbox(item, key=key):
+                    if item not in st.session_state.habilidades_selecionadas[cat]:
+                        st.session_state.habilidades_selecionadas[cat].append(item)
                 else:
-                    if nome_item in st.session_state.habilidades_selecionadas[cat_json]:
-                        st.session_state.habilidades_selecionadas[cat_json].remove(nome_item)
+                    if item in st.session_state.habilidades_selecionadas[cat]:
+                        st.session_state.habilidades_selecionadas[cat].remove(item)
 
-    col1, col2 = st.columns(2)
+    if st.button("⬅️ Voltar"):
+        st.session_state.etapa = 1
+        st.rerun()
 
-    with col1:
-        if st.button("⬅️ Voltar"):
-            st.session_state.etapa = 1
-            st.rerun()
+    if st.button("📥 Gerar Relatório"):
+        excel = gerar_excel()
 
-    with col2:
-        if st.button("🚀 Ver Resultado"):
-
-            total = sum(len(v) for v in bi_areas[area].values())
-            marcadas = sum(len(v) for v in st.session_state.habilidades_selecionadas.values())
-            porcentagem = (marcadas / total) * 100
-
-            nivel = calcular_nivel(porcentagem)
-
-            faltantes_alta, faltantes_media = analisar_resultado(
-                area,
-                st.session_state.habilidades_selecionadas
-            )
-
-            # ======================
-            # RESULTADO
-            # ======================
-            st.success(f"🎯 Seu nível: **{nivel}**")
-            st.progress(int(porcentagem))
-
-            st.markdown("### 🚧 O que você precisa aprender AGORA:")
-            for item in faltantes_alta[:5]:
-                st.write(f"• {item}")
-
-            st.markdown("### 📈 Próximos passos:")
-            for item in faltantes_media[:5]:
-                st.write(f"• {item}")
-
-            # CTA (Landing)
-            st.markdown("""
-            ---
-            ### 🚀 Quer acelerar sua carreira em dados?
-
-            Receba um plano completo com:
-            ✔ trilha personalizada  
-            ✔ roadmap de estudos  
-            ✔ skills mais valorizadas pelo mercado  
-
-            👉 Em breve disponível
-            """)
-
-            # Excel
-            excel = gerar_excel(area, porcentagem, nivel, faltantes_alta, faltantes_media)
-
-            st.download_button(
-                "⬇️ Baixar diagnóstico em Excel",
-                excel,
-                "diagnostico_dados.xlsx",
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            )
+        st.download_button(
+            "⬇️ Baixar Excel",
+            excel,
+            "relatorio_habilidades.xlsx",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
