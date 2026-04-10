@@ -127,7 +127,7 @@ def gerar_excel(area, dados, habilidades):
 # ==============================
 if st.session_state.etapa == 1:
 
-    st.title("🚀 Descubra seu nível em Dados")
+    st.title("🚀 Ficha Candidato")
 
     with st.form("cadastro"):
 
