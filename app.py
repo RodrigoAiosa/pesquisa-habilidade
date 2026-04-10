@@ -3,7 +3,8 @@ import pandas as pd
 from io import BytesIO
 
 from validators import validar_email, validar_celular
-from google_api import salvar_google_sheets  # 🔥 nova integração
+from google_api import salvar_google_sheets, salvar_resumo_google_sheets
+
 
 # ==============================
 # CONFIG
@@ -19,6 +20,7 @@ st.set_page_config(
 # ==============================
 with open("style.css") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
 
 # ==============================
 # ÁREAS DE DADOS
@@ -51,6 +53,7 @@ bi_areas = {
     }
 }
 
+
 # ==============================
 # SESSION STATE
 # ==============================
@@ -63,12 +66,26 @@ if "dados_candidato" not in st.session_state:
 if "habilidades_selecionadas" not in st.session_state:
     st.session_state.habilidades_selecionadas = {}
 
+if "area_selecionada" not in st.session_state:
+    st.session_state.area_selecionada = None
+
+
+# ==============================
+# FUNÇÃO DE SCORE
+# ==============================
+def calcular_score(area, habilidades):
+    total = sum(len(v) for v in bi_areas[area].values())
+    marcadas = sum(len(v) for v in habilidades.values())
+
+    porcentagem = (marcadas / total) * 100 if total > 0 else 0
+
+    return total, marcadas, porcentagem
+
+
 # ==============================
 # FUNÇÃO EXCEL
 # ==============================
-def gerar_excel():
-    dados = st.session_state.dados_candidato
-    habilidades = st.session_state.habilidades_selecionadas
+def gerar_excel(area, dados, habilidades):
 
     detalhes = []
     for categoria, itens in habilidades.items():
@@ -78,23 +95,31 @@ def gerar_excel():
                 "Habilidade": item
             })
 
-    total = sum(len(v) for v in bi_areas[st.session_state.area_selecionada].values())
-    marcadas = sum(len(v) for v in habilidades.values())
-    porcentagem = (marcadas / total) * 100 if total > 0 else 0
+    total, marcadas, porcentagem = calcular_score(area, habilidades)
 
     output = BytesIO()
     with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
-        pd.DataFrame(detalhes).to_excel(writer, sheet_name="Detalhes", index=False)
+
+        pd.DataFrame(detalhes).to_excel(
+            writer,
+            sheet_name="Detalhes",
+            index=False
+        )
 
         pd.DataFrame({
             "Nome": [dados.get("nome")],
-            "Área": [st.session_state.area_selecionada],
+            "Área": [area],
             "Habilidades Marcadas": [marcadas],
             "Total": [total],
             "Conclusão": [f"{porcentagem:.1f}%"]
-        }).to_excel(writer, sheet_name="Resumo", index=False)
+        }).to_excel(
+            writer,
+            sheet_name="Resumo",
+            index=False
+        )
 
-    return output.getvalue()
+    return output.getvalue(), total, marcadas, porcentagem
+
 
 # ==============================
 # TELA 1 - FORMULÁRIO
@@ -102,9 +127,10 @@ def gerar_excel():
 if st.session_state.etapa == 1:
 
     st.title("🚀 Descubra seu nível em Dados")
-    st.markdown("Receba um diagnóstico completo da sua carreira em Data Analytics, BI, Engenharia ou Ciência de Dados.")
+    st.markdown("Avalie seu fit para áreas de Dados, BI, Engenharia e IA.")
 
     with st.form("cadastro"):
+
         nome = st.text_input("Nome completo*")
         sexo = st.selectbox("Sexo*", ["Masculino", "Feminino", "Outro"])
         email = st.text_input("E-mail*")
@@ -129,6 +155,7 @@ if st.session_state.etapa == 1:
                 for e in erros:
                     st.error(e)
             else:
+
                 dados = {
                     "nome": nome,
                     "sexo": sexo,
@@ -136,12 +163,13 @@ if st.session_state.etapa == 1:
                     "celular": celular
                 }
 
-                # 🔥 SALVA NO GOOGLE SHEETS (via módulo separado)
                 salvar_google_sheets(dados)
 
                 st.session_state.dados_candidato = dados
                 st.session_state.etapa = 2
+
                 st.rerun()
+
 
 # ==============================
 # TELA 2 - HABILIDADES
@@ -149,13 +177,17 @@ if st.session_state.etapa == 1:
 elif st.session_state.etapa == 2:
 
     st.title("📊 Avaliação de Habilidades")
-    st.markdown(f"**Candidato:** {st.session_state.dados_candidato.get('nome', '')}")
+
+    dados = st.session_state.dados_candidato
+    st.markdown(f"**Candidato:** {dados.get('nome')}")
 
     area = st.selectbox(
         "Selecione sua área:",
         list(bi_areas.keys()),
         key="area_selecionada"
     )
+
+    st.session_state.area_selecionada = area
 
     if area not in st.session_state.habilidades_selecionadas:
         st.session_state.habilidades_selecionadas = {
@@ -187,7 +219,27 @@ elif st.session_state.etapa == 2:
 
     with col2:
         if st.button("📥 Gerar Relatório"):
-            excel = gerar_excel()
+
+            excel, total, marcadas, porcentagem = gerar_excel(
+                area,
+                st.session_state.dados_candidato,
+                st.session_state.habilidades_selecionadas
+            )
+
+            # ==============================
+            # SALVAR RESUMO NO GOOGLE SHEETS
+            # ==============================
+            resumo = {
+                "nome": dados.get("nome"),
+                "area": area,
+                "habilidades_marcadas": marcadas,
+                "total": total,
+                "conclusao": f"{porcentagem:.1f}%"
+            }
+
+            salvar_resumo_google_sheets(resumo)
+
+            st.success("Resumo salvo no Google Sheets com sucesso!")
 
             st.download_button(
                 "⬇️ Baixar Excel",
