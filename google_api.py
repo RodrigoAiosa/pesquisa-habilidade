@@ -10,19 +10,17 @@ import time
 GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby9qXNnvoJDP6ghOq-z_vnEktGYnQ0cRmocmw7neYG7XCkt9NpMVxy1yntklTXzagTP/exec"
 DB_FILE = "queue.db"
 
-# 🔒 lock global (evita concorrência entre threads)
 DB_LOCK = threading.Lock()
+WORKER_STARTED = False
 
 
 # ==============================
-# CONEXÃO SEGURA SQLITE
+# CONEXÃO SEGURA + WAL MODE
 # ==============================
 def get_conn():
-    return sqlite3.connect(
-        DB_FILE,
-        check_same_thread=False,
-        timeout=30
-    )
+    conn = sqlite3.connect(DB_FILE, check_same_thread=False, timeout=30)
+    conn.execute("PRAGMA journal_mode=WAL")  # 🔥 ESSENCIAL para Streamlit
+    return conn
 
 
 # ==============================
@@ -67,8 +65,8 @@ def is_duplicate(email: str):
         """, (email,))
 
         exists = cursor.fetchone() is not None
-
         conn.close()
+
         return exists
 
 
@@ -82,7 +80,6 @@ def enqueue(payload: dict):
         email = email.strip().lower()
         payload["email"] = email
 
-    # 🔒 bloqueio duplicado
     if is_duplicate(email):
         print(f"[SKIP] duplicado: {email}")
         return False
@@ -132,8 +129,8 @@ def process_queue():
                 conn.close()
 
             for row in rows:
-                row_id = row[0]
-                payload = json.loads(row[1])
+                row_id, payload = row
+                payload = json.loads(payload)
 
                 try:
                     response = requests.post(
@@ -146,18 +143,11 @@ def process_queue():
                         conn = get_conn()
                         cursor = conn.cursor()
 
-                        if response.status_code == 200:
-                            cursor.execute("""
-                                UPDATE queue
-                                SET status = 'sent'
-                                WHERE id = ?
-                            """, (row_id,))
-                        else:
-                            cursor.execute("""
-                                UPDATE queue
-                                SET status = 'error'
-                                WHERE id = ?
-                            """, (row_id,))
+                        cursor.execute("""
+                            UPDATE queue
+                            SET status = ?
+                            WHERE id = ?
+                        """, ("sent" if response.status_code == 200 else "error", row_id))
 
                         conn.commit()
                         conn.close()
@@ -172,15 +162,22 @@ def process_queue():
 
 
 # ==============================
-# START WORKER
+# START WORKER (SINGLETON)
 # ==============================
 def start_worker():
+    global WORKER_STARTED
+
+    if WORKER_STARTED:
+        return
+
+    WORKER_STARTED = True
+
     thread = threading.Thread(target=process_queue, daemon=True)
     thread.start()
 
 
 # ==============================
-# API CADASTRO
+# API
 # ==============================
 def salvar_google_sheets(dados: dict):
     payload = {
@@ -194,9 +191,6 @@ def salvar_google_sheets(dados: dict):
     return enqueue(payload)
 
 
-# ==============================
-# API RESUMO
-# ==============================
 def salvar_resumo_google_sheets(resumo: dict):
     payload = {
         "tipo": "resumo",
@@ -212,7 +206,7 @@ def salvar_resumo_google_sheets(resumo: dict):
 
 
 # ==============================
-# INIT
+# INIT (SAFE)
 # ==============================
 init_db()
 start_worker()
