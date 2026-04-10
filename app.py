@@ -1,17 +1,3 @@
-Vou criar um aplicativo Streamlit completo com todas as funcionalidades que você solicitou:  
-
-### **📋 Estrutura do App:**  
-1. **Tela 1:** Formulário de cadastro do candidato (nome, sexo, e-mail, celular).  
-2. **Tela 2:** Seleção da área de BI e exibição de **Requisitos**, **Diferenciais** e **Soft Skills** (com checkboxes).  
-3. **Tela 3:** Botão **"Salvar em Excel"** que gera um arquivo com:  
-   - **Aba "Detalhes"**: Todos os itens marcados.  
-   - **Aba "Resumo"**: Porcentagem de habilidades alcançadas.  
-
----
-
-## **📌 Código Completo (`app.py`)**  
-
-```python
 import streamlit as st
 import pandas as pd
 from io import BytesIO
@@ -222,3 +208,4 @@ elif st.session_state.etapa == 2:
     
     if st.button("Voltar"):
         st.session_state.etapa = 1
+        st.rerun()
