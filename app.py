@@ -66,6 +66,9 @@ if "dados_candidato" not in st.session_state:
 if "habilidades_selecionadas" not in st.session_state:
     st.session_state.habilidades_selecionadas = {}
 
+if "relatorio_gerado" not in st.session_state:
+    st.session_state.relatorio_gerado = False
+
 
 # ==============================
 # FUNÇÃO DE SCORE
@@ -78,7 +81,7 @@ def calcular_score(area, habilidades):
 
 
 # ==============================
-# FUNÇÃO EXCEL
+# EXCEL
 # ==============================
 def gerar_excel(area, dados, habilidades):
 
@@ -117,7 +120,7 @@ def gerar_excel(area, dados, habilidades):
 
 
 # ==============================
-# TELA 1 - FORMULÁRIO
+# TELA 1
 # ==============================
 if st.session_state.etapa == 1:
 
@@ -162,12 +165,13 @@ if st.session_state.etapa == 1:
 
                 st.session_state.dados_candidato = dados
                 st.session_state.etapa = 2
+                st.session_state.relatorio_gerado = False
 
                 st.rerun()
 
 
 # ==============================
-# TELA 2 - HABILIDADES
+# TELA 2
 # ==============================
 elif st.session_state.etapa == 2:
 
@@ -182,7 +186,6 @@ elif st.session_state.etapa == 2:
         key="area_selecionada"
     )
 
-    # 🔥 Inicializa estrutura de habilidades quando área muda
     if area not in st.session_state.habilidades_selecionadas:
         st.session_state.habilidades_selecionadas = {
             cat: [] for cat in bi_areas[area].keys()
@@ -195,12 +198,9 @@ elif st.session_state.etapa == 2:
             st.subheader(cat)
 
             for item in itens:
-                key = f"{area}_{cat}_{item}"  # chave mais segura
+                key = f"{area}_{cat}_{item}"
 
-                checked = st.checkbox(
-                    item,
-                    key=key
-                )
+                checked = st.checkbox(item, key=key)
 
                 if checked:
                     if item not in st.session_state.habilidades_selecionadas[cat]:
@@ -217,29 +217,40 @@ elif st.session_state.etapa == 2:
             st.rerun()
 
     with col2:
-        if st.button("📥 Gerar Relatório"):
 
-            excel, total, marcadas, porcentagem = gerar_excel(
-                area,
-                st.session_state.dados_candidato,
-                st.session_state.habilidades_selecionadas
-            )
+        # 🔒 BLOQUEIO DUPLO ENVIO
+        if st.session_state.relatorio_gerado:
+            st.success("✔ Relatório já foi gerado e enviado.")
+            st.button("📥 Gerar Relatório", disabled=True)
 
-            resumo = {
-                "nome": dados.get("nome"),
-                "area": area,
-                "habilidades_marcadas": marcadas,
-                "total": total,
-                "conclusao": f"{porcentagem:.1f}%"
-            }
+        else:
+            if st.button("📥 Enviar Dados"):
 
-            salvar_resumo_google_sheets(resumo)
+                excel, total, marcadas, porcentagem = gerar_excel(
+                    area,
+                    st.session_state.dados_candidato,
+                    st.session_state.habilidades_selecionadas
+                )
 
-            st.success("Dados enviados com sucesso!")
+                resumo = {
+                    "nome": dados.get("nome"),
+                    "area": area,
+                    "habilidades_marcadas": marcadas,
+                    "total": total,
+                    "conclusao": f"{porcentagem:.1f}%"
+                }
 
-            st.download_button(
-                "⬇️ Baixar Excel",
-                excel,
-                "relatorio_habilidades.xlsx",
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            )
+                salvar_resumo_google_sheets(resumo)
+
+                st.session_state.relatorio_gerado = True
+
+                st.success("Dados enviados com sucesso!")
+
+                st.download_button(
+                    "⬇️ Baixar Excel",
+                    excel,
+                    "relatorio_habilidades.xlsx",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                )
+
+                st.rerun()
