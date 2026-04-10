@@ -1,129 +1,143 @@
-/* ==============================
-🌌 FUNDO GERAL
-============================== */
+import streamlit.components.v1 as components
+
+html_form = """
+<!DOCTYPE html>
+<html>
+<head>
+<style>
 body {
-    background: #0f0f0f;
-    color: white;
-    font-family: 'Segoe UI', sans-serif;
+  background: #0f0f0f;
+  font-family: Arial;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
 
+/* Container */
+.form-container {
+  background: #1a1a1a;
+  padding: 40px;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 380px;
 
-/* ==============================
-🎯 CONTAINER ESTILO UIVERSE
-============================== */
-.block-container {
-    max-width: 480px;
-    margin: 5vh auto;
-    padding: 32px 24px;
-
-    background: linear-gradient(#212121, #212121) padding-box,
-        linear-gradient(120deg, transparent 25%, #1cb0ff, #40ff99) border-box;
-
-    border: 2px solid transparent;
-    border-radius: 16px;
-
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+  box-shadow: 0 0 40px rgba(0,0,0,0.6);
+  border: 1px solid #2a2a2a;
 }
 
-
-/* ==============================
-🧠 TÍTULO
-============================== */
-h1, h2, h3 {
-    text-align: center;
-    font-size: 20px;
-    font-weight: 600;
-    color: white;
+/* Título */
+.title {
+  color: white;
+  text-align: center;
+  margin-bottom: 25px;
+  font-size: 22px;
 }
 
-
-/* ==============================
-🧾 INPUTS (STREAMLIT ADAPTADO)
-============================== */
-.stTextInput>div>div>input,
-.stSelectbox>div>div>select {
-
-    color: white;
-    background: transparent;
-
-    border: 1px solid #414141;
-    border-radius: 5px;
-    padding: 10px;
-
-    outline: none;
+/* Grupo */
+.form-group {
+  position: relative;
+  margin-bottom: 20px;
 }
 
-
-/* ==============================
-📦 GRUPOS (SIMULA .form-group)
-============================== */
-.stTextInput, .stSelectbox {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
+/* Input */
+.form-group input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #444;
+  border-radius: 8px;
+  background: transparent;
+  color: white;
+  outline: none;
 }
 
-
-/* Labels estilo minimalista */
-label {
-    color: #bdb8b8 !important;
-    font-size: 12px !important;
+/* Label */
+.form-group label {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  color: #aaa;
+  transform: translateY(-50%);
+  transition: 0.3s;
+  pointer-events: none;
 }
 
-
-/* ==============================
-🔘 BOTÕES
-============================== */
-.stButton>button {
-    border-radius: 5px;
-    padding: 10px;
-
-    background: #ffffff14;
-    color: #c7c5c5;
-
-    border: 1px solid #414141;
-    width: 100%;
+/* Floating label REAL */
+.form-group input:focus ~ label,
+.form-group input:not(:placeholder-shown) ~ label {
+  top: -8px;
+  left: 10px;
+  font-size: 11px;
+  background: #1a1a1a;
+  padding: 0 5px;
+  color: #8b5cf6;
 }
 
-.stButton>button:hover {
-    background: #212121;
-    cursor: pointer;
+/* Botão */
+button {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(90deg, #6a0dad, #9d4edd);
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
 }
 
-
-/* ==============================
-☑️ CHECKBOX
-============================== */
-.stCheckbox label {
-    color: #c7c5c5;
-    font-size: 13px;
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(157,78,221,0.5);
 }
+</style>
+</head>
 
+<body>
 
-/* ==============================
-⚠️ ALERTAS
-============================== */
-.stAlert {
-    background-color: #212121;
-    border-left: 3px solid #40ff99;
-    color: white;
+<div class="form-container">
+  <div class="title">🚀 Iniciar Diagnóstico</div>
+
+  <div class="form-group">
+    <input id="nome" placeholder=" " />
+    <label>Nome completo</label>
+  </div>
+
+  <div class="form-group">
+    <input id="email" placeholder=" " />
+    <label>Email</label>
+  </div>
+
+  <div class="form-group">
+    <input id="celular" placeholder=" " />
+    <label>Celular</label>
+  </div>
+
+  <button onclick="enviar()">Começar</button>
+</div>
+
+<script>
+function enviar() {
+  const data = {
+    nome: document.getElementById("nome").value,
+    email: document.getElementById("email").value,
+    celular: document.getElementById("celular").value
+  };
+
+  window.parent.postMessage({
+    type: "streamlit:setComponentValue",
+    value: data
+  }, "*");
 }
+</script>
 
+</body>
+</html>
+"""
 
-/* ==============================
-📊 PROGRESS BAR
-============================== */
-.stProgress > div > div > div {
-    background: linear-gradient(90deg, #1cb0ff, #40ff99);
-}
+resposta = components.html(html_form, height=500)
 
-
-/* ==============================
-📏 ESPAÇAMENTO GERAL
-============================== */
-section.main > div {
-    display: flex;
-    justify-content: center;
-}
+if resposta:
+    st.session_state.dados_candidato = resposta
+    st.session_state.etapa = 2
+    st.rerun()
