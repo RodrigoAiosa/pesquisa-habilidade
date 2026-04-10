@@ -23,14 +23,28 @@ def salvar_google_sheets(dados: dict):
 
 
 # ==============================
-# RESUMO COM LISTA + CONTAGEM
+# RESUMO COM STATUS
 # ==============================
 def salvar_resumo_google_sheets(resumo: dict):
 
     habilidades = resumo.get("habilidades_lista", [])
 
+    # lista → string
     habilidades_str = ", ".join(habilidades)
+
+    # contagem
     contagem = len(habilidades)
+
+    # extrair percentual (ex: "88.9%")
+    percentual_str = resumo.get("conclusao", "0%").replace("%", "")
+
+    try:
+        percentual = float(percentual_str)
+    except:
+        percentual = 0
+
+    # 🔥 REGRA DE NEGÓCIO
+    status = "Apto" if percentual >= 75 else "Não Apto"
 
     payload = {
         "tipo": "resumo",
@@ -40,7 +54,8 @@ def salvar_resumo_google_sheets(resumo: dict):
         "habilidades_marcadas": habilidades_str,
         "contagem_habilidades_marcadas": contagem,
         "total": resumo.get("total"),
-        "conclusao": resumo.get("conclusao")
+        "conclusao_percentual": resumo.get("conclusao"),
+        "status": status
     }
 
     try:
