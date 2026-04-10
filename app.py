@@ -254,3 +254,4 @@ elif st.session_state.etapa == 2:
                 )
 
                 st.rerun()
+                st.session_state.etapa = 1
