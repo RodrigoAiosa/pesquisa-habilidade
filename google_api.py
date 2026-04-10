@@ -10,31 +10,45 @@ import time
 GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby9qXNnvoJDP6ghOq-z_vnEktGYnQ0cRmocmw7neYG7XCkt9NpMVxy1yntklTXzagTP/exec"
 DB_FILE = "queue.db"
 
+# 🔒 lock global (evita concorrência entre threads)
+DB_LOCK = threading.Lock()
+
 
 # ==============================
-# BANCO (FILA PERSISTENTE)
+# CONEXÃO SEGURA SQLITE
+# ==============================
+def get_conn():
+    return sqlite3.connect(
+        DB_FILE,
+        check_same_thread=False,
+        timeout=30
+    )
+
+
+# ==============================
+# INIT DB
 # ==============================
 def init_db():
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
+    with DB_LOCK:
+        conn = get_conn()
+        cursor = conn.cursor()
 
-    # tabela com constraint UNIQUE direta (mais estável que índice separado)
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS queue (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            email TEXT UNIQUE,
-            payload TEXT NOT NULL,
-            status TEXT DEFAULT 'pending',
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS queue (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                email TEXT,
+                payload TEXT NOT NULL,
+                status TEXT DEFAULT 'pending',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
 
-    conn.commit()
-    conn.close()
+        conn.commit()
+        conn.close()
 
 
 # ==============================
-# VERIFICAR DUPLICIDADE
+# DUPLICIDADE
 # ==============================
 def is_duplicate(email: str):
     if not email:
@@ -42,23 +56,24 @@ def is_duplicate(email: str):
 
     email = email.strip().lower()
 
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
+    with DB_LOCK:
+        conn = get_conn()
+        cursor = conn.cursor()
 
-    cursor.execute("""
-        SELECT 1 FROM queue
-        WHERE email = ?
-        LIMIT 1
-    """, (email,))
+        cursor.execute("""
+            SELECT 1 FROM queue
+            WHERE email = ?
+            LIMIT 1
+        """, (email,))
 
-    exists = cursor.fetchone() is not None
+        exists = cursor.fetchone() is not None
 
-    conn.close()
-    return exists
+        conn.close()
+        return exists
 
 
 # ==============================
-# ADICIONAR NA FILA
+# ENQUEUE
 # ==============================
 def enqueue(payload: dict):
     email = payload.get("email")
@@ -67,49 +82,54 @@ def enqueue(payload: dict):
         email = email.strip().lower()
         payload["email"] = email
 
-    # 🔒 BLOQUEIO DUPLICIDADE ANTES DE INSERIR
+    # 🔒 bloqueio duplicado
     if is_duplicate(email):
-        print(f"[SKIP] Email duplicado: {email}")
+        print(f"[SKIP] duplicado: {email}")
         return False
-
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
 
     try:
-        cursor.execute("""
-            INSERT INTO queue (email, payload, status)
-            VALUES (?, ?, 'pending')
-        """, (email, json.dumps(payload)))
+        with DB_LOCK:
+            conn = get_conn()
+            cursor = conn.cursor()
 
-        conn.commit()
+            cursor.execute("""
+                INSERT INTO queue (email, payload, status)
+                VALUES (?, ?, 'pending')
+            """, (email, json.dumps(payload)))
+
+            conn.commit()
+            conn.close()
+
         return True
 
-    except sqlite3.IntegrityError:
-        # segurança extra contra race condition
-        print(f"[SKIP] IntegrityError duplicado: {email}")
+    except sqlite3.OperationalError as e:
+        print(f"[SQLITE ERROR] {e}")
         return False
 
-    finally:
-        conn.close()
+    except sqlite3.IntegrityError:
+        print(f"[SKIP] integrity duplicate: {email}")
+        return False
 
 
 # ==============================
-# PROCESSAR FILA
+# WORKER
 # ==============================
 def process_queue():
     while True:
         try:
-            conn = sqlite3.connect(DB_FILE)
-            cursor = conn.cursor()
+            with DB_LOCK:
+                conn = get_conn()
+                cursor = conn.cursor()
 
-            cursor.execute("""
-                SELECT id, payload FROM queue
-                WHERE status = 'pending'
-                ORDER BY id ASC
-                LIMIT 5
-            """)
+                cursor.execute("""
+                    SELECT id, payload FROM queue
+                    WHERE status = 'pending'
+                    ORDER BY id ASC
+                    LIMIT 5
+                """)
 
-            rows = cursor.fetchall()
+                rows = cursor.fetchall()
+                conn.close()
 
             for row in rows:
                 row_id = row[0]
@@ -122,20 +142,28 @@ def process_queue():
                         timeout=10
                     )
 
-                    if response.status_code == 200:
-                        cursor.execute("""
-                            UPDATE queue
-                            SET status = 'sent'
-                            WHERE id = ?
-                        """, (row_id,))
-                    else:
-                        print(f"[HTTP ERROR] {response.status_code}")
+                    with DB_LOCK:
+                        conn = get_conn()
+                        cursor = conn.cursor()
+
+                        if response.status_code == 200:
+                            cursor.execute("""
+                                UPDATE queue
+                                SET status = 'sent'
+                                WHERE id = ?
+                            """, (row_id,))
+                        else:
+                            cursor.execute("""
+                                UPDATE queue
+                                SET status = 'error'
+                                WHERE id = ?
+                            """, (row_id,))
+
+                        conn.commit()
+                        conn.close()
 
                 except Exception as e:
-                    print(f"[ENVIO ERROR] {e}")
-
-            conn.commit()
-            conn.close()
+                    print(f"[SEND ERROR] {e}")
 
         except Exception as e:
             print(f"[WORKER ERROR] {e}")
@@ -152,7 +180,7 @@ def start_worker():
 
 
 # ==============================
-# SALVAR CADASTRO
+# API CADASTRO
 # ==============================
 def salvar_google_sheets(dados: dict):
     payload = {
@@ -167,7 +195,7 @@ def salvar_google_sheets(dados: dict):
 
 
 # ==============================
-# SALVAR RESUMO
+# API RESUMO
 # ==============================
 def salvar_resumo_google_sheets(resumo: dict):
     payload = {
@@ -184,7 +212,7 @@ def salvar_resumo_google_sheets(resumo: dict):
 
 
 # ==============================
-# INICIALIZAÇÃO AUTOMÁTICA
+# INIT
 # ==============================
 init_db()
 start_worker()
