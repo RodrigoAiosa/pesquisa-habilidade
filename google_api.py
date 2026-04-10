@@ -3,6 +3,9 @@ import requests
 GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby9qXNnvoJDP6ghOq-z_vnEktGYnQ0cRmocmw7neYG7XCkt9NpMVxy1yntklTXzagTP/exec"
 
 
+# ==============================
+# CADASTRO
+# ==============================
 def salvar_google_sheets(dados: dict):
     payload = {
         "tipo": "cadastro",
@@ -19,13 +22,23 @@ def salvar_google_sheets(dados: dict):
         return False
 
 
+# ==============================
+# RESUMO COM LISTA + CONTAGEM
+# ==============================
 def salvar_resumo_google_sheets(resumo: dict):
+
+    habilidades = resumo.get("habilidades_lista", [])
+
+    habilidades_str = ", ".join(habilidades)
+    contagem = len(habilidades)
+
     payload = {
         "tipo": "resumo",
         "email": resumo.get("email"),
         "nome": resumo.get("nome"),
         "area": resumo.get("area"),
-        "habilidades_marcadas": resumo.get("habilidades_marcadas"),
+        "habilidades_marcadas": habilidades_str,
+        "contagem_habilidades_marcadas": contagem,
         "total": resumo.get("total"),
         "conclusao": resumo.get("conclusao")
     }
