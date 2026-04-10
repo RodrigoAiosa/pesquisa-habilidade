@@ -66,9 +66,6 @@ if "dados_candidato" not in st.session_state:
 if "habilidades_selecionadas" not in st.session_state:
     st.session_state.habilidades_selecionadas = {}
 
-if "area_selecionada" not in st.session_state:
-    st.session_state.area_selecionada = None
-
 
 # ==============================
 # FUNÇÃO DE SCORE
@@ -76,9 +73,7 @@ if "area_selecionada" not in st.session_state:
 def calcular_score(area, habilidades):
     total = sum(len(v) for v in bi_areas[area].values())
     marcadas = sum(len(v) for v in habilidades.values())
-
     porcentagem = (marcadas / total) * 100 if total > 0 else 0
-
     return total, marcadas, porcentagem
 
 
@@ -187,8 +182,7 @@ elif st.session_state.etapa == 2:
         key="area_selecionada"
     )
 
-    st.session_state.area_selecionada = area
-
+    # 🔥 Inicializa estrutura de habilidades quando área muda
     if area not in st.session_state.habilidades_selecionadas:
         st.session_state.habilidades_selecionadas = {
             cat: [] for cat in bi_areas[area].keys()
@@ -201,9 +195,14 @@ elif st.session_state.etapa == 2:
             st.subheader(cat)
 
             for item in itens:
-                key = f"{cat}_{item}"
+                key = f"{area}_{cat}_{item}"  # chave mais segura
 
-                if st.checkbox(item, key=key):
+                checked = st.checkbox(
+                    item,
+                    key=key
+                )
+
+                if checked:
                     if item not in st.session_state.habilidades_selecionadas[cat]:
                         st.session_state.habilidades_selecionadas[cat].append(item)
                 else:
@@ -226,9 +225,6 @@ elif st.session_state.etapa == 2:
                 st.session_state.habilidades_selecionadas
             )
 
-            # ==============================
-            # SALVAR RESUMO NO GOOGLE SHEETS
-            # ==============================
             resumo = {
                 "nome": dados.get("nome"),
                 "area": area,
