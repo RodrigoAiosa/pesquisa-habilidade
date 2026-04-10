@@ -17,7 +17,7 @@ body {
 📦 CONTAINER CENTRAL
 ============================== */
 .block-container {
-  max-width: 420px;
+  max-width: 600px;
   margin: 5vh auto;
 
   display: flex;
