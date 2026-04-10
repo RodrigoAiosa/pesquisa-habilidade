@@ -1,5 +1,5 @@
 /* ==============================
-🌌 FUNDO
+🌌 BASE
 ============================== */
 body {
   background-color: #0f0f0f;
@@ -7,7 +7,6 @@ body {
   font-family: Arial, sans-serif;
 }
 
-/* Seleção */
 ::selection {
   background-color: gray;
 }
@@ -17,91 +16,123 @@ body {
 📦 CONTAINER CENTRAL
 ============================== */
 .block-container {
-  max-width: 800px;
+  max-width: 480px;
   margin: 5vh auto;
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-
-/* ==============================
-🧾 "FORM" VISUAL
-============================== */
-.block-container > div {
-  width: 100%;
   padding: 30px;
 
   background-image: linear-gradient(to bottom, #424242, #212121);
 
+  border-radius: 0.6rem;
+
   display: flex;
   flex-direction: column;
-  align-items: center;
-
-  border-radius: 0.5rem;
+  align-items: stretch;
 }
 
 
 /* ==============================
-🧠 TÍTULO
+🧠 TÍTULOS
 ============================== */
 h1, h2, h3 {
   color: wheat;
-  margin-bottom: 20px;
-  font-size: 1.8rem;
   text-align: center;
+  margin-bottom: 20px;
 }
 
 
 /* ==============================
-✏️ INPUTS (ADAPTADO)
+📏 PADRÃO GLOBAL DE INPUT (CORE)
 ============================== */
+.stTextInput > div > div,
+.stSelectbox > div > div {
+  width: 100%;
+}
+
+/* INPUT e SELECT IGUAIS */
 .stTextInput>div>div>input,
 .stSelectbox>div>div>select {
 
-  margin: 0.5rem 0;
-  padding: 1rem 0.5rem;
   width: 100%;
+  height: 48px !important;
 
-  background-color: transparent;
-  color: wheat;
+  padding: 0 12px !important;
 
-  border: none;
-  outline: none;
-  border-bottom: 1px solid wheat;
-
-  transition: all 0.4s ease;
-}
-
-.stTextInput>div>div>input:hover,
-.stSelectbox>div>div>select:hover {
-  background-color: #424242;
-  border-radius: 0.5rem;
-}
-
-
-/* Remove fundo branco interno */
-.stTextInput>div>div,
-.stSelectbox>div>div {
-  background: transparent;
-}
-
-
-/* Labels */
-label {
+  background-color: transparent !important;
   color: wheat !important;
-  font-size: 0.85rem !important;
+
+  border: none !important;
+  border-bottom: 1px solid wheat !important;
+
+  outline: none !important;
+
+  box-sizing: border-box;
+
+  transition: all 0.3s ease;
 }
 
 
 /* ==============================
-🔘 BOTÃO
+✨ HOVER / FOCO
+============================== */
+.stTextInput>div>div>input:hover,
+.stSelectbox>div>div>select:hover {
+  background-color: #424242;
+  border-radius: 6px;
+}
+
+.stTextInput>div>div>input:focus,
+.stSelectbox>div>div>select:focus {
+  border-bottom: 1px solid #ffffff;
+}
+
+
+/* ==============================
+🔧 CORREÇÃO DO SELECT (CRÍTICO)
+============================== */
+.stSelectbox div[data-baseweb="select"] {
+  background-color: transparent !important;
+  border: none !important;
+}
+
+/* Remove borda duplicada */
+.stSelectbox div {
+  border: none !important;
+}
+
+/* Alinha conteúdo vertical */
+.stSelectbox > div {
+  display: flex;
+  align-items: center;
+  height: 48px;
+}
+
+
+/* ==============================
+🏷 LABELS
+============================== */
+label {
+  color: wheat !important;
+  font-size: 0.85rem !important;
+  margin-bottom: 4px;
+}
+
+
+/* ==============================
+📏 ESPAÇAMENTO ENTRE CAMPOS
+============================== */
+.stTextInput,
+.stSelectbox {
+  margin-bottom: 14px;
+}
+
+
+/* ==============================
+🔘 BOTÃO (PADRÃO UIVERSE)
 ============================== */
 .stButton>button {
-  height: 3rem;
+  height: 48px;
   width: 100%;
-  margin-top: 2rem;
+  margin-top: 20px;
 
   background-color: wheat;
   color: #212121;
@@ -109,10 +140,12 @@ label {
   border-radius: 0.5rem;
   border: none;
 
-  font-size: 1.2rem;
+  font-size: 1rem;
+  font-weight: 600;
+
   cursor: pointer;
 
-  transition: all 0.4s ease;
+  transition: all 0.3s ease;
 
   box-shadow:
     0 0 10px antiquewhite,
@@ -122,6 +155,11 @@ label {
 .stButton>button:hover {
   background-color: antiquewhite;
   box-shadow: none;
+  transform: translateY(-1px);
+}
+
+.stButton>button:active {
+  transform: scale(0.98);
 }
 
 
@@ -132,4 +170,21 @@ label {
   background-color: #212121;
   border-left: 3px solid wheat;
   color: wheat;
+  border-radius: 6px;
+}
+
+
+/* ==============================
+📊 PROGRESS BAR
+============================== */
+.stProgress > div > div > div {
+  background-color: wheat;
+}
+
+
+/* ==============================
+✨ MICRODETALHES
+============================== */
+.block-container:hover {
+  box-shadow: 0 0 25px rgba(255, 255, 255, 0.05);
 }
