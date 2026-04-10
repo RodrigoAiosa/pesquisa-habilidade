@@ -69,9 +69,12 @@ if "habilidades_selecionadas" not in st.session_state:
 if "relatorio_gerado" not in st.session_state:
     st.session_state.relatorio_gerado = False
 
+if "processando" not in st.session_state:
+    st.session_state.processando = False
+
 
 # ==============================
-# FUNÇÃO DE SCORE
+# SCORE
 # ==============================
 def calcular_score(area, habilidades):
     total = sum(len(v) for v in bi_areas[area].values())
@@ -154,18 +157,16 @@ if st.session_state.etapa == 1:
                     st.error(e)
             else:
 
-                dados = {
+                st.session_state.dados_candidato = {
                     "nome": nome,
                     "sexo": sexo,
                     "email": email,
                     "celular": celular
                 }
 
-                salvar_google_sheets(dados)
-
-                st.session_state.dados_candidato = dados
                 st.session_state.etapa = 2
                 st.session_state.relatorio_gerado = False
+                st.session_state.processando = False
 
                 st.rerun()
 
@@ -218,40 +219,60 @@ elif st.session_state.etapa == 2:
 
     with col2:
 
-        # 🔒 BLOQUEIO DUPLO ENVIO
+        # ==============================
+        # 🔒 BLOQUEIO ANTI DUPLICAÇÃO REAL
+        # ==============================
         if st.session_state.relatorio_gerado:
-            st.success("✔ Relatório já foi gerado e enviado.")
+            st.success("✔ Relatório já foi gerado.")
             st.button("📥 Gerar Relatório", disabled=True)
 
         else:
-            if st.button("📥 Enviar Dados"):
 
-                excel, total, marcadas, porcentagem = gerar_excel(
-                    area,
-                    st.session_state.dados_candidato,
-                    st.session_state.habilidades_selecionadas
-                )
+            gerar = st.button("📥 Gerar Relatório")
 
-                resumo = {
-                    "nome": dados.get("nome"),
-                    "area": area,
-                    "habilidades_marcadas": marcadas,
-                    "total": total,
-                    "conclusao": f"{porcentagem:.1f}%"
-                }
+            if gerar and not st.session_state.processando:
 
-                salvar_resumo_google_sheets(resumo)
+                # 🔒 trava imediata
+                st.session_state.processando = True
 
-                st.session_state.relatorio_gerado = True
+                try:
+                    excel, total, marcadas, porcentagem = gerar_excel(
+                        area,
+                        st.session_state.dados_candidato,
+                        st.session_state.habilidades_selecionadas
+                    )
 
-                st.success("Dados enviados com sucesso!")
+                    resumo = {
+                        "nome": dados.get("nome"),
+                        "area": area,
+                        "habilidades_marcadas": marcadas,
+                        "total": total,
+                        "conclusao": f"{porcentagem:.1f}%"
+                    }
 
-                st.download_button(
-                    "⬇️ Baixar Excel",
-                    excel,
-                    "relatorio_habilidades.xlsx",
-                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                )
+                    salvar_google_sheets({
+                        "evento": "cadastro_relatorio",
+                        **dados
+                    })
+
+                    salvar_resumo_google_sheets(resumo)
+
+                    st.session_state.relatorio_gerado = True
+
+                    st.success("Dados enviados com sucesso!")
+
+                    st.download_button(
+                        "⬇️ Baixar Excel",
+                        excel,
+                        "relatorio_habilidades.xlsx",
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    )
+
+                except Exception as e:
+                    st.error(f"Erro ao gerar relatório: {e}")
+                    st.session_state.relatorio_gerado = False
+
+                finally:
+                    st.session_state.processando = False
 
                 st.rerun()
-                st.session_state.etapa = 1
