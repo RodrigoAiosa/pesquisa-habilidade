@@ -1,8 +1,14 @@
 import requests
 
-GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzbWDJx_2TuXXtPnMdn3507XPkcQha_AImQ_lRn14Y3y1Ii_mdTs_ZsdV64vYc6UxWs2w/exec"
+# ==============================
+# NOVA URL DO GOOGLE APPS SCRIPT
+# ==============================
+GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby9qXNnvoJDP6ghOq-z_vnEktGYnQ0cRmocmw7neYG7XCkt9NpMVxy1yntklTXzagTP/exec"
 
 
+# ==============================
+# SALVAR CADASTRO
+# ==============================
 def salvar_google_sheets(dados: dict):
     payload = {
         "tipo": "cadastro",
@@ -13,12 +19,16 @@ def salvar_google_sheets(dados: dict):
     }
 
     try:
-        requests.post(GOOGLE_SCRIPT_URL, json=payload, timeout=5)
+        response = requests.post(GOOGLE_SCRIPT_URL, json=payload, timeout=10)
+        return response.json()
     except Exception as e:
         print(f"Erro cadastro: {e}")
+        return {"status": "erro", "message": str(e)}
 
 
-# 🔥 NOVA FUNÇÃO: SALVAR RESUMO
+# ==============================
+# SALVAR RESUMO
+# ==============================
 def salvar_resumo_google_sheets(resumo: dict):
     payload = {
         "tipo": "resumo",
@@ -30,6 +40,8 @@ def salvar_resumo_google_sheets(resumo: dict):
     }
 
     try:
-        requests.post(GOOGLE_SCRIPT_URL, json=payload, timeout=5)
+        response = requests.post(GOOGLE_SCRIPT_URL, json=payload, timeout=10)
+        return response.json()
     except Exception as e:
         print(f"Erro resumo: {e}")
+        return {"status": "erro", "message": str(e)}
