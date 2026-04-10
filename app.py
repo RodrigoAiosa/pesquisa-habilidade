@@ -24,7 +24,7 @@ with open("style.css") as f:
 
 
 # ==============================
-# ÁREAS DE DADOS
+# ÁREAS
 # ==============================
 bi_areas = {
     "Análise de Dados": {
@@ -39,7 +39,7 @@ bi_areas = {
     },
     "Engenharia de Dados": {
         "📌 Requisitos": ["Python", "SQL", "ETL", "Banco de Dados"],
-        "🚀 Diferenciais": ["Spark", "Airflow", "Cloud (AWS/GCP/Azure)"],
+        "🚀 Diferenciais": ["Spark", "Airflow", "Cloud"],
         "🧠 Soft Skills": ["Raciocínio Lógico", "Resolução de Problemas"]
     },
     "Ciência de Dados": {
@@ -49,14 +49,14 @@ bi_areas = {
     },
     "Analytics Engineer": {
         "📌 Requisitos": ["SQL", "dbt", "Modelagem de Dados"],
-        "🚀 Diferenciais": ["Data Warehouse", "Versionamento (Git)"],
+        "🚀 Diferenciais": ["Data Warehouse", "Git"],
         "🧠 Soft Skills": ["Organização", "Documentação"]
     }
 }
 
 
 # ==============================
-# SESSION STATE
+# SESSION
 # ==============================
 if "etapa" not in st.session_state:
     st.session_state.etapa = 1
@@ -100,11 +100,7 @@ def gerar_excel(area, dados, habilidades):
 
     with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
 
-        pd.DataFrame(detalhes).to_excel(
-            writer,
-            sheet_name="Detalhes",
-            index=False
-        )
+        pd.DataFrame(detalhes).to_excel(writer, sheet_name="Detalhes", index=False)
 
         pd.DataFrame({
             "Nome": [dados.get("nome")],
@@ -113,21 +109,17 @@ def gerar_excel(area, dados, habilidades):
             "Habilidades Marcadas": [marcadas],
             "Total": [total],
             "Conclusão": [f"{porcentagem:.1f}%"]
-        }).to_excel(
-            writer,
-            sheet_name="Resumo",
-            index=False
-        )
+        }).to_excel(writer, sheet_name="Resumo", index=False)
 
     return output.getvalue(), total, marcadas, porcentagem
 
 
 # ==============================
-# TELA 1 - CADASTRO
+# TELA 1
 # ==============================
 if st.session_state.etapa == 1:
 
-    st.title("🚀 Ficha Candidato")
+    st.title("🚀 Descubra seu nível em Dados")
 
     with st.form("cadastro"):
 
@@ -136,7 +128,7 @@ if st.session_state.etapa == 1:
         email = st.text_input("E-mail*")
         celular = st.text_input("Celular (opcional)")
 
-        submit = st.form_submit_button("📝 Enviar")
+        submit = st.form_submit_button("Iniciar diagnóstico")
 
         if submit:
 
@@ -172,27 +164,20 @@ if st.session_state.etapa == 1:
 
                 st.session_state.dados_candidato = dados
                 st.session_state.etapa = 2
-                st.session_state.relatorio_gerado = False
-
                 st.rerun()
 
 
 # ==============================
-# TELA 2 - AVALIAÇÃO
+# TELA 2
 # ==============================
 elif st.session_state.etapa == 2:
 
     st.title("📊 Avaliação de Habilidades")
 
     dados = st.session_state.dados_candidato
-
     st.markdown(f"**Candidato:** {dados.get('nome')}")
 
-    area = st.selectbox(
-        "Selecione sua área:",
-        list(bi_areas.keys()),
-        key="area_selecionada"
-    )
+    area = st.selectbox("Selecione sua área:", list(bi_areas.keys()))
 
     if area not in st.session_state.habilidades_selecionadas:
         st.session_state.habilidades_selecionadas = {
@@ -203,11 +188,9 @@ elif st.session_state.etapa == 2:
 
     for i, (cat, itens) in enumerate(bi_areas[area].items()):
         with cols[i]:
-
             st.subheader(cat)
 
             for item in itens:
-
                 key = f"{area}_{cat}_{item}"
                 checked = st.checkbox(item, key=key)
 
@@ -218,53 +201,39 @@ elif st.session_state.etapa == 2:
                     if item in st.session_state.habilidades_selecionadas[cat]:
                         st.session_state.habilidades_selecionadas[cat].remove(item)
 
-    col1, col2 = st.columns(2)
+    if st.button("Gerar Relatório"):
 
-    with col1:
-        if st.button("⬅️ Voltar"):
-            st.session_state.etapa = 1
-            st.rerun()
+        excel, total, marcadas, porcentagem = gerar_excel(
+            area,
+            st.session_state.dados_candidato,
+            st.session_state.habilidades_selecionadas
+        )
 
-    with col2:
+        # 🔥 lista completa de habilidades
+        todas_habilidades = []
+        for categoria, itens in st.session_state.habilidades_selecionadas.items():
+            todas_habilidades.extend(itens)
 
-        if st.session_state.relatorio_gerado:
-            st.success("✔ Relatório já foi gerado.")
-            st.button("📥 Gerar Relatório", disabled=True)
+        resumo = {
+            "email": dados.get("email"),
+            "nome": dados.get("nome"),
+            "area": area,
+            "habilidades_lista": todas_habilidades,
+            "total": total,
+            "conclusao": f"{porcentagem:.1f}%"
+        }
 
-        else:
+        sucesso = salvar_resumo_google_sheets(resumo)
 
-            if st.button("📥 Gerar Relatório"):
+        if not sucesso:
+            st.error("Erro ao salvar resumo.")
+            st.stop()
 
-                excel, total, marcadas, porcentagem = gerar_excel(
-                    area,
-                    st.session_state.dados_candidato,
-                    st.session_state.habilidades_selecionadas
-                )
+        st.success("Dados enviados com sucesso!")
 
-                resumo = {
-                    "email": dados.get("email"),
-                    "nome": dados.get("nome"),
-                    "area": area,
-                    "habilidades_marcadas": marcadas,
-                    "total": total,
-                    "conclusao": f"{porcentagem:.1f}%"
-                }
-
-                sucesso = salvar_resumo_google_sheets(resumo)
-
-                if not sucesso:
-                    st.error("Erro ao salvar resumo.")
-                    st.stop()
-
-                st.session_state.relatorio_gerado = True
-
-                st.success("✔ Dados enviados com sucesso!")
-
-                st.download_button(
-                    "⬇️ Baixar Excel",
-                    excel,
-                    "relatorio_habilidades.xlsx",
-                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                )
-
-                st.rerun()
+        st.download_button(
+            "⬇️ Baixar Excel",
+            excel,
+            "relatorio.xlsx",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
