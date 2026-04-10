@@ -34,12 +34,12 @@ bi_areas = {
     },
     "Business Intelligence (BI)": {
         "📌 Requisitos": ["Power BI", "Modelagem de Dados", "DAX", "SQL"],
-        "🚀 Diferenciais": ["Data Warehouse", "ETL", "Governança"],
+        "🚀 Diferenciais": ["Data Warehouse", "ETL", "Governança de Dados"],
         "🧠 Soft Skills": ["Visão de Negócio", "Organização"]
     },
     "Engenharia de Dados": {
         "📌 Requisitos": ["Python", "SQL", "ETL", "Banco de Dados"],
-        "🚀 Diferenciais": ["Spark", "Airflow", "Cloud"],
+        "🚀 Diferenciais": ["Spark", "Airflow", "Cloud (AWS/GCP/Azure)"],
         "🧠 Soft Skills": ["Raciocínio Lógico", "Resolução de Problemas"]
     },
     "Ciência de Dados": {
@@ -48,8 +48,8 @@ bi_areas = {
         "🧠 Soft Skills": ["Curiosidade", "Pensamento Crítico"]
     },
     "Analytics Engineer": {
-        "📌 Requisitos": ["SQL", "dbt", "Modelagem"],
-        "🚀 Diferenciais": ["Data Warehouse", "Git"],
+        "📌 Requisitos": ["SQL", "dbt", "Modelagem de Dados"],
+        "🚀 Diferenciais": ["Data Warehouse", "Versionamento (Git)"],
         "🧠 Soft Skills": ["Organização", "Documentação"]
     }
 }
@@ -58,14 +58,17 @@ bi_areas = {
 # ==============================
 # SESSION STATE
 # ==============================
-for key, value in {
-    "etapa": 1,
-    "dados_candidato": {},
-    "habilidades_selecionadas": {},
-    "relatorio_gerado": False
-}.items():
-    if key not in st.session_state:
-        st.session_state[key] = value
+if "etapa" not in st.session_state:
+    st.session_state.etapa = 1
+
+if "dados_candidato" not in st.session_state:
+    st.session_state.dados_candidato = {}
+
+if "habilidades_selecionadas" not in st.session_state:
+    st.session_state.habilidades_selecionadas = {}
+
+if "relatorio_gerado" not in st.session_state:
+    st.session_state.relatorio_gerado = False
 
 
 # ==============================
@@ -163,9 +166,8 @@ if st.session_state.etapa == 1:
 
                 sucesso = salvar_google_sheets(dados)
 
-                # 🔒 BLOQUEIO DUPLICIDADE REAL
                 if not sucesso:
-                    st.error("⚠️ Este e-mail já foi cadastrado.")
+                    st.error("Erro ao salvar cadastro.")
                     st.stop()
 
                 st.session_state.dados_candidato = dados
@@ -183,6 +185,7 @@ elif st.session_state.etapa == 2:
     st.title("📊 Avaliação de Habilidades")
 
     dados = st.session_state.dados_candidato
+
     st.markdown(f"**Candidato:** {dados.get('nome')}")
 
     area = st.selectbox(
@@ -191,12 +194,10 @@ elif st.session_state.etapa == 2:
         key="area_selecionada"
     )
 
-    # 🔒 reset correto por mudança de área
-    if st.session_state.habilidades_selecionadas.get("_area") != area:
+    if area not in st.session_state.habilidades_selecionadas:
         st.session_state.habilidades_selecionadas = {
             cat: [] for cat in bi_areas[area].keys()
         }
-        st.session_state.habilidades_selecionadas["_area"] = area
 
     cols = st.columns(3)
 
@@ -228,7 +229,7 @@ elif st.session_state.etapa == 2:
 
         if st.session_state.relatorio_gerado:
             st.success("✔ Relatório já foi gerado.")
-            st.button("📥 Gerar", disabled=True)
+            st.button("📥 Gerar Relatório", disabled=True)
 
         else:
 
@@ -249,7 +250,11 @@ elif st.session_state.etapa == 2:
                     "conclusao": f"{porcentagem:.1f}%"
                 }
 
-                salvar_resumo_google_sheets(resumo)
+                sucesso = salvar_resumo_google_sheets(resumo)
+
+                if not sucesso:
+                    st.error("Erro ao salvar resumo.")
+                    st.stop()
 
                 st.session_state.relatorio_gerado = True
 
