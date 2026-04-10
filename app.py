@@ -1,8 +1,9 @@
 import streamlit as st
 import pandas as pd
-import requests
 from io import BytesIO
+
 from validators import validar_email, validar_celular
+from google_api import salvar_google_sheets  # 🔥 nova integração
 
 # ==============================
 # CONFIG
@@ -18,25 +19,6 @@ st.set_page_config(
 # ==============================
 with open("style.css") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-
-# ==============================
-# GOOGLE SHEETS (SUA API)
-# ==============================
-GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzbWDJx_2TuXXtPnMdn3507XPkcQha_AImQ_lRn14Y3y1Ii_mdTs_ZsdV64vYc6UxWs2w/exec"
-
-def salvar_google_sheets(dados):
-    payload = {
-        "nome": dados["nome"],
-        "sexo": dados["sexo"],
-        "email": dados["email"],
-        "celular": dados["celular"]
-    }
-
-    try:
-        requests.post(GOOGLE_SCRIPT_URL, json=payload, timeout=5)
-    except Exception as e:
-        st.warning("⚠️ Não foi possível salvar no Google Sheets")
-
 
 # ==============================
 # ÁREAS DE DADOS
@@ -91,22 +73,26 @@ def gerar_excel():
     detalhes = []
     for categoria, itens in habilidades.items():
         for item in itens:
-            detalhes.append({"Categoria": categoria, "Habilidade": item})
+            detalhes.append({
+                "Categoria": categoria,
+                "Habilidade": item
+            })
 
     total = sum(len(v) for v in bi_areas[st.session_state.area_selecionada].values())
     marcadas = sum(len(v) for v in habilidades.values())
-    porcentagem = (marcadas / total) * 100
+    porcentagem = (marcadas / total) * 100 if total > 0 else 0
 
     output = BytesIO()
-    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-        pd.DataFrame(detalhes).to_excel(writer, sheet_name='Detalhes', index=False)
+    with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
+        pd.DataFrame(detalhes).to_excel(writer, sheet_name="Detalhes", index=False)
+
         pd.DataFrame({
-            "Nome": [dados["nome"]],
+            "Nome": [dados.get("nome")],
             "Área": [st.session_state.area_selecionada],
             "Habilidades Marcadas": [marcadas],
             "Total": [total],
             "Conclusão": [f"{porcentagem:.1f}%"]
-        }).to_excel(writer, sheet_name='Resumo', index=False)
+        }).to_excel(writer, sheet_name="Resumo", index=False)
 
     return output.getvalue()
 
@@ -124,7 +110,9 @@ if st.session_state.etapa == 1:
         email = st.text_input("E-mail*")
         celular = st.text_input("Celular (opcional)")
 
-        if st.form_submit_button("🚀 Iniciar diagnóstico"):
+        submit = st.form_submit_button("🚀 Iniciar diagnóstico")
+
+        if submit:
 
             erros = []
 
@@ -148,7 +136,7 @@ if st.session_state.etapa == 1:
                     "celular": celular
                 }
 
-                # 🔥 SALVA NO GOOGLE SHEETS
+                # 🔥 SALVA NO GOOGLE SHEETS (via módulo separado)
                 salvar_google_sheets(dados)
 
                 st.session_state.dados_candidato = dados
@@ -161,7 +149,7 @@ if st.session_state.etapa == 1:
 elif st.session_state.etapa == 2:
 
     st.title("📊 Avaliação de Habilidades")
-    st.markdown(f"**Candidato:** {st.session_state.dados_candidato['nome']}")
+    st.markdown(f"**Candidato:** {st.session_state.dados_candidato.get('nome', '')}")
 
     area = st.selectbox(
         "Selecione sua área:",
@@ -179,8 +167,10 @@ elif st.session_state.etapa == 2:
     for i, (cat, itens) in enumerate(bi_areas[area].items()):
         with cols[i]:
             st.subheader(cat)
+
             for item in itens:
                 key = f"{cat}_{item}"
+
                 if st.checkbox(item, key=key):
                     if item not in st.session_state.habilidades_selecionadas[cat]:
                         st.session_state.habilidades_selecionadas[cat].append(item)
@@ -188,16 +178,20 @@ elif st.session_state.etapa == 2:
                     if item in st.session_state.habilidades_selecionadas[cat]:
                         st.session_state.habilidades_selecionadas[cat].remove(item)
 
-    if st.button("⬅️ Voltar"):
-        st.session_state.etapa = 1
-        st.rerun()
+    col1, col2 = st.columns(2)
 
-    if st.button("📥 Gerar Relatório"):
-        excel = gerar_excel()
+    with col1:
+        if st.button("⬅️ Voltar"):
+            st.session_state.etapa = 1
+            st.rerun()
 
-        st.download_button(
-            "⬇️ Baixar Excel",
-            excel,
-            "relatorio_habilidades.xlsx",
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
+    with col2:
+        if st.button("📥 Gerar Relatório"):
+            excel = gerar_excel()
+
+            st.download_button(
+                "⬇️ Baixar Excel",
+                excel,
+                "relatorio_habilidades.xlsx",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
