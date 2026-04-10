@@ -235,7 +235,7 @@ elif st.session_state.etapa == 2:
 
             salvar_resumo_google_sheets(resumo)
 
-            st.success("Resumo salvo no Google Sheets com sucesso!")
+            st.success("Dados enviados com sucesso!")
 
             st.download_button(
                 "⬇️ Baixar Excel",
