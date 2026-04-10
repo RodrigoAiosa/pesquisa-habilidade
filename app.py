@@ -15,6 +15,7 @@ st.set_page_config(
     layout="centered"
 )
 
+
 # ==============================
 # CSS
 # ==============================
@@ -33,12 +34,12 @@ bi_areas = {
     },
     "Business Intelligence (BI)": {
         "📌 Requisitos": ["Power BI", "Modelagem de Dados", "DAX", "SQL"],
-        "🚀 Diferenciais": ["Data Warehouse", "ETL", "Governança de Dados"],
+        "🚀 Diferenciais": ["Data Warehouse", "ETL", "Governança"],
         "🧠 Soft Skills": ["Visão de Negócio", "Organização"]
     },
     "Engenharia de Dados": {
         "📌 Requisitos": ["Python", "SQL", "ETL", "Banco de Dados"],
-        "🚀 Diferenciais": ["Spark", "Airflow", "Cloud (AWS/GCP/Azure)"],
+        "🚀 Diferenciais": ["Spark", "Airflow", "Cloud"],
         "🧠 Soft Skills": ["Raciocínio Lógico", "Resolução de Problemas"]
     },
     "Ciência de Dados": {
@@ -47,8 +48,8 @@ bi_areas = {
         "🧠 Soft Skills": ["Curiosidade", "Pensamento Crítico"]
     },
     "Analytics Engineer": {
-        "📌 Requisitos": ["SQL", "dbt", "Modelagem de Dados"],
-        "🚀 Diferenciais": ["Data Warehouse", "Versionamento (Git)"],
+        "📌 Requisitos": ["SQL", "dbt", "Modelagem"],
+        "🚀 Diferenciais": ["Data Warehouse", "Git"],
         "🧠 Soft Skills": ["Organização", "Documentação"]
     }
 }
@@ -57,21 +58,18 @@ bi_areas = {
 # ==============================
 # SESSION STATE
 # ==============================
-if "etapa" not in st.session_state:
-    st.session_state.etapa = 1
-
-if "dados_candidato" not in st.session_state:
-    st.session_state.dados_candidato = {}
-
-if "habilidades_selecionadas" not in st.session_state:
-    st.session_state.habilidades_selecionadas = {}
-
-if "relatorio_gerado" not in st.session_state:
-    st.session_state.relatorio_gerado = False
+for key, value in {
+    "etapa": 1,
+    "dados_candidato": {},
+    "habilidades_selecionadas": {},
+    "relatorio_gerado": False
+}.items():
+    if key not in st.session_state:
+        st.session_state[key] = value
 
 
 # ==============================
-# FUNÇÃO DE SCORE
+# SCORE
 # ==============================
 def calcular_score(area, habilidades):
     total = sum(len(v) for v in bi_areas[area].values())
@@ -96,6 +94,7 @@ def gerar_excel(area, dados, habilidades):
     total, marcadas, porcentagem = calcular_score(area, habilidades)
 
     output = BytesIO()
+
     with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
 
         pd.DataFrame(detalhes).to_excel(
@@ -106,6 +105,7 @@ def gerar_excel(area, dados, habilidades):
 
         pd.DataFrame({
             "Nome": [dados.get("nome")],
+            "Email": [dados.get("email")],
             "Área": [area],
             "Habilidades Marcadas": [marcadas],
             "Total": [total],
@@ -120,12 +120,11 @@ def gerar_excel(area, dados, habilidades):
 
 
 # ==============================
-# TELA 1
+# TELA 1 - CADASTRO
 # ==============================
 if st.session_state.etapa == 1:
 
     st.title("🚀 Descubra seu nível em Dados")
-    st.markdown("Avalie seu fit para áreas de Dados, BI, Engenharia e IA.")
 
     with st.form("cadastro"):
 
@@ -134,7 +133,7 @@ if st.session_state.etapa == 1:
         email = st.text_input("E-mail*")
         celular = st.text_input("Celular (opcional)")
 
-        submit = st.form_submit_button("🚀 Iniciar diagnóstico")
+        submit = st.form_submit_button("Iniciar diagnóstico")
 
         if submit:
 
@@ -152,6 +151,7 @@ if st.session_state.etapa == 1:
             if erros:
                 for e in erros:
                     st.error(e)
+
             else:
 
                 dados = {
@@ -161,7 +161,12 @@ if st.session_state.etapa == 1:
                     "celular": celular
                 }
 
-                salvar_google_sheets(dados)
+                sucesso = salvar_google_sheets(dados)
+
+                # 🔒 BLOQUEIO DUPLICIDADE REAL
+                if not sucesso:
+                    st.error("⚠️ Este e-mail já foi cadastrado.")
+                    st.stop()
 
                 st.session_state.dados_candidato = dados
                 st.session_state.etapa = 2
@@ -171,7 +176,7 @@ if st.session_state.etapa == 1:
 
 
 # ==============================
-# TELA 2
+# TELA 2 - AVALIAÇÃO
 # ==============================
 elif st.session_state.etapa == 2:
 
@@ -186,20 +191,23 @@ elif st.session_state.etapa == 2:
         key="area_selecionada"
     )
 
-    if area not in st.session_state.habilidades_selecionadas:
+    # 🔒 reset correto por mudança de área
+    if st.session_state.habilidades_selecionadas.get("_area") != area:
         st.session_state.habilidades_selecionadas = {
             cat: [] for cat in bi_areas[area].keys()
         }
+        st.session_state.habilidades_selecionadas["_area"] = area
 
     cols = st.columns(3)
 
     for i, (cat, itens) in enumerate(bi_areas[area].items()):
         with cols[i]:
+
             st.subheader(cat)
 
             for item in itens:
-                key = f"{area}_{cat}_{item}"
 
+                key = f"{area}_{cat}_{item}"
                 checked = st.checkbox(item, key=key)
 
                 if checked:
@@ -218,12 +226,12 @@ elif st.session_state.etapa == 2:
 
     with col2:
 
-        # 🔒 BLOQUEIO DUPLO ENVIO
         if st.session_state.relatorio_gerado:
-            st.success("✔ Relatório já foi gerado e enviado.")
-            st.button("📥 Gerar Relatório", disabled=True)
+            st.success("✔ Relatório já foi gerado.")
+            st.button("📥 Gerar", disabled=True)
 
         else:
+
             if st.button("📥 Gerar Relatório"):
 
                 excel, total, marcadas, porcentagem = gerar_excel(
@@ -233,6 +241,7 @@ elif st.session_state.etapa == 2:
                 )
 
                 resumo = {
+                    "email": dados.get("email"),
                     "nome": dados.get("nome"),
                     "area": area,
                     "habilidades_marcadas": marcadas,
@@ -244,7 +253,7 @@ elif st.session_state.etapa == 2:
 
                 st.session_state.relatorio_gerado = True
 
-                st.success("Dados enviados com sucesso!")
+                st.success("✔ Dados enviados com sucesso!")
 
                 st.download_button(
                     "⬇️ Baixar Excel",
