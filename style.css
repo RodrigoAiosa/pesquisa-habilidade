@@ -1,0 +1,80 @@
+/* style.css */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+:root {
+    --primary: #4361ee;
+    --secondary: #3f37c9;
+    --dark: #1e1e24;
+    --light: #f8f9fa;
+    --success: #4cc9f0;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background-color: var(--light);
+    color: var(--dark);
+}
+
+.stApp {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: white;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+
+h1 {
+    color: var(--primary);
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.stButton>button {
+    background-color: var(--primary) !important;
+    color: white !important;
+    border: none;
+    padding: 0.5rem 1.5rem;
+    border-radius: 5px;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.stButton>button:hover {
+    background-color: var(--secondary) !important;
+    transform: translateY(-2px);
+}
+
+.stTextInput>div>div>input,
+.stSelectbox>div>div>select {
+    border: 1px solid #ddd !important;
+    border-radius: 5px !important;
+    padding: 0.5rem !important;
+}
+
+.stMarkdown h2 {
+    color: var(--secondary);
+    margin-top: 1.5rem;
+}
+
+.stCheckbox>label {
+    font-size: 0.9rem;
+    color: var(--dark);
+}
+
+.stAlert {
+    border-radius: 5px;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .stApp {
+        padding: 1rem;
+    }
+}
