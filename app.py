@@ -114,7 +114,7 @@ def resetar_app():
 # ==============================
 if st.session_state.etapa == 1:
 
-    st.title("🚀 Descubra seu nível em Dados")
+    st.title("📒 RH - Controle de Candidatos")
 
     with st.form("cadastro"):
 
