@@ -123,7 +123,7 @@ if st.session_state.etapa == 1:
         email = st.text_input("E-mail*")
         celular = st.text_input("Celular (opcional)")
 
-        submit = st.form_submit_button("📒 Enviar Dados")
+        submit = st.form_submit_button("✅ Iniciar")
 
         if submit:
 
