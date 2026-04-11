@@ -166,15 +166,19 @@ elif st.session_state.etapa == 2:
             st.subheader(cat)
 
             for item in itens:
-                key = f"{area}_{cat}_{item}"
-                checked = st.checkbox(item, key=key)
+
+                # 🔥 garante string (corrige erro)
+                item_str = str(item)
+
+                key = f"{area}_{cat}_{item_str}"
+                checked = st.checkbox(item_str, key=key)
 
                 if checked:
-                    if item not in st.session_state.habilidades_selecionadas[cat]:
-                        st.session_state.habilidades_selecionadas[cat].append(item)
+                    if item_str not in st.session_state.habilidades_selecionadas[cat]:
+                        st.session_state.habilidades_selecionadas[cat].append(item_str)
                 else:
-                    if item in st.session_state.habilidades_selecionadas[cat]:
-                        st.session_state.habilidades_selecionadas[cat].remove(item)
+                    if item_str in st.session_state.habilidades_selecionadas[cat]:
+                        st.session_state.habilidades_selecionadas[cat].remove(item_str)
 
     if st.button("📥 Gerar Relatório"):
 
