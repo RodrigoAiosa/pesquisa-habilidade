@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import json
 from io import BytesIO
 
 from validators import validar_email, validar_celular
@@ -24,35 +25,10 @@ with open("style.css") as f:
 
 
 # ==============================
-# ÁREAS
+# CARREGAR JSON
 # ==============================
-bi_areas = {
-    "Análise de Dados": {
-        "📌 Requisitos": ["SQL", "Python", "Excel Avançado", "Power BI"],
-        "🚀 Diferenciais": ["Estatística", "Storytelling com Dados", "ETL"],
-        "🧠 Soft Skills": ["Comunicação", "Pensamento Analítico"]
-    },
-    "Business Intelligence (BI)": {
-        "📌 Requisitos": ["Power BI", "Modelagem de Dados", "DAX", "SQL"],
-        "🚀 Diferenciais": ["Data Warehouse", "ETL", "Governança de Dados"],
-        "🧠 Soft Skills": ["Visão de Negócio", "Organização"]
-    },
-    "Engenharia de Dados": {
-        "📌 Requisitos": ["Python", "SQL", "ETL", "Banco de Dados"],
-        "🚀 Diferenciais": ["Spark", "Airflow", "Cloud"],
-        "🧠 Soft Skills": ["Raciocínio Lógico", "Resolução de Problemas"]
-    },
-    "Ciência de Dados": {
-        "📌 Requisitos": ["Python", "Estatística", "Machine Learning"],
-        "🚀 Diferenciais": ["Deep Learning", "NLP", "MLOps"],
-        "🧠 Soft Skills": ["Curiosidade", "Pensamento Crítico"]
-    },
-    "Analytics Engineer": {
-        "📌 Requisitos": ["SQL", "dbt", "Modelagem de Dados"],
-        "🚀 Diferenciais": ["Data Warehouse", "Git"],
-        "🧠 Soft Skills": ["Organização", "Documentação"]
-    }
-}
+with open("bi_areas.json", "r", encoding="utf-8") as f:
+    bi_areas = json.load(f)
 
 
 # ==============================
@@ -108,7 +84,7 @@ def gerar_excel(area, dados, habilidades):
             "Área": [area],
             "Habilidades Marcadas": [marcadas],
             "Total": [total],
-            "Conclusão": [f"{porcentagem:.1f}%"]
+            "Resultado": [f"{porcentagem:.2f}%"],
         }).to_excel(writer, sheet_name="Resumo", index=False)
 
     return output.getvalue(), total, marcadas, porcentagem
@@ -128,7 +104,7 @@ if st.session_state.etapa == 1:
         email = st.text_input("E-mail*")
         celular = st.text_input("Celular (opcional)")
 
-        submit = st.form_submit_button("📒 Enviar Dados")
+        submit = st.form_submit_button("Iniciar diagnóstico")
 
         if submit:
 
@@ -146,7 +122,6 @@ if st.session_state.etapa == 1:
             if erros:
                 for e in erros:
                     st.error(e)
-
             else:
 
                 dados = {
@@ -201,7 +176,7 @@ elif st.session_state.etapa == 2:
                     if item in st.session_state.habilidades_selecionadas[cat]:
                         st.session_state.habilidades_selecionadas[cat].remove(item)
 
-    if st.button("📝 Enviar"):
+    if st.button("📥 Gerar Relatório"):
 
         excel, total, marcadas, porcentagem = gerar_excel(
             area,
@@ -209,18 +184,15 @@ elif st.session_state.etapa == 2:
             st.session_state.habilidades_selecionadas
         )
 
-        # 🔥 lista completa de habilidades
         todas_habilidades = []
         for categoria, itens in st.session_state.habilidades_selecionadas.items():
             todas_habilidades.extend(itens)
 
         resumo = {
-            "email": dados.get("email"),
             "nome": dados.get("nome"),
             "area": area,
             "habilidades_lista": todas_habilidades,
-            "total": total,
-            "conclusao": f"{porcentagem:.1f}%"
+            "total": total
         }
 
         sucesso = salvar_resumo_google_sheets(resumo)
