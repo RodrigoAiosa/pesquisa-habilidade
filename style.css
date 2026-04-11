@@ -1,206 +1,28 @@
-/* ==============================
-🌌 BASE
-============================== */
-body {
-  background-color: #0f0f0f;
-  color: wheat;
-  font-family: Arial, sans-serif;
-}
+import streamlit as st
 
-::selection {
-  background-color: gray;
-}
+# Carregue o CSS (coloque o código CSS em um arquivo style.css ou diretamente)
+with open('style.css') as f:
+    st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
-
-/* ==============================
-📦 CONTAINER PRINCIPAL
-============================== */
-.block-container {
-  max-width: 800px;
-  margin: 5vh auto;
-  padding: 30px;
-
-  background-image: linear-gradient(to bottom, #424242, #212121);
-
-  border-radius: 0.8rem;
-
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-
-  box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
-}
-
-
-/* ==============================
-📦 FORM INTERNO (ARREDONDADO)
-============================== */
-[data-testid="stForm"] {
-  border-radius: 16px !important;
-  padding: 24px;
-
-  background: rgba(255, 255, 255, 0.03);
-
-  border: 1px solid rgba(255, 255, 255, 0.08);
-
-  backdrop-filter: blur(6px);
-}
-
-
-/* ==============================
-🧠 TÍTULOS
-============================== */
-h1, h2, h3 {
-  color: wheat;
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-
-/* ==============================
-📏 INPUTS E SELECT (IGUAIS)
-============================== */
-.stTextInput > div > div,
-.stSelectbox > div > div {
-  width: 100%;
-}
-
-.stTextInput>div>div>input,
-.stSelectbox>div>div>select {
-
-  width: 100%;
-  height: 48px !important;
-
-  padding: 0 12px !important;
-
-  background-color: transparent !important;
-  color: wheat !important;
-
-  border: none !important;
-  border-bottom: 1px solid wheat !important;
-
-  border-radius: 8px !important;
-
-  outline: none !important;
-
-  box-sizing: border-box;
-
-  transition: all 0.3s ease;
-}
-
-
-/* ==============================
-✨ HOVER / FOCO
-============================== */
-.stTextInput>div>div>input:hover,
-.stSelectbox>div>div>select:hover {
-  background-color: #424242;
-}
-
-.stTextInput>div>div>input:focus,
-.stSelectbox>div>div>select:focus {
-  border-bottom: 1px solid #ffffff;
-  background-color: #2a2a2a;
-}
-
-
-/* ==============================
-🔧 CORREÇÃO DO SELECT
-============================== */
-.stSelectbox div[data-baseweb="select"] {
-  background-color: transparent !important;
-  border: none !important;
-}
-
-.stSelectbox div {
-  border: none !important;
-}
-
-.stSelectbox > div {
-  display: flex;
-  align-items: center;
-  height: 48px;
-}
-
-
-/* ==============================
-🏷 LABELS
-============================== */
-label {
-  color: wheat !important;
-  font-size: 0.85rem !important;
-  margin-bottom: 4px;
-}
-
-
-/* ==============================
-📏 ESPAÇAMENTO
-============================== */
-.stTextInput,
-.stSelectbox {
-  margin-bottom: 14px;
-}
-
-
-/* ==============================
-🔘 BOTÃO
-============================== */
-.stButton>button {
-  height: 48px;
-  width: 100%;
-  margin-top: 20px;
-
-  background-color: wheat;
-  color: #212121;
-
-  border-radius: 0.6rem;
-  border: none;
-
-  font-size: 1rem;
-  font-weight: 600;
-
-  cursor: pointer;
-
-  transition: all 0.3s ease;
-
-  box-shadow:
-    0 0 10px antiquewhite,
-    0 0 10px antiquewhite;
-}
-
-.stButton>button:hover {
-  background-color: antiquewhite;
-  box-shadow: none;
-  transform: translateY(-1px);
-}
-
-.stButton>button:active {
-  transform: scale(0.98);
-}
-
-
-/* ==============================
-⚠️ ALERTAS
-============================== */
-.stAlert {
-  background-color: #212121;
-  border-left: 3px solid wheat;
-  color: wheat;
-  border-radius: 6px;
-}
-
-
-/* ==============================
-📊 PROGRESS BAR
-============================== */
-.stProgress > div > div > div {
-  background-color: wheat;
-}
-
-
-/* ==============================
-✨ MICROINTERAÇÕES
-============================== */
-.block-container:hover {
-  box-shadow: 0 0 60px rgba(255, 255, 255, 0.05);
-}
+# Exemplo de estrutura HTML para usar com o CSS
+st.markdown('''
+<div class="block-container">
+    <div class="card">
+        <div class="card2">
+            <div class="form">
+                <div id="heading">Seu Título Aqui</div>
+                
+                <div class="field">
+                    <svg class="input-icon" viewBox="0 0 24 24">...</svg>
+                    <input class="input-field" type="text" placeholder="Exemplo" />
+                </div>
+                
+                <div class="btn">
+                    <button class="button1">Cancelar</button>
+                    <button class="button2">Enviar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+''', unsafe_allow_html=True)
