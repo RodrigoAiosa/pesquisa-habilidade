@@ -1,6 +1,7 @@
 import requests
 
-GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby9qXNnvoJDP6ghOq-z_vnEktGYnQ0cRmocmw7neYG7XCkt9NpMVxy1yntklTXzagTP/exec"
+# URL ATUALIZADA com seu novo deployment
+GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzVNEOwWaiO7NozJ87VN_Yc_T6ApQFozaG8IHnv6zUmIZpkefGb82UMqYIjjEtHGFac5g/exec"
 
 
 # ==============================
@@ -16,9 +17,11 @@ def salvar_google_sheets(dados: dict):
     }
 
     try:
-        requests.post(GOOGLE_SCRIPT_URL, json=payload, timeout=10)
+        response = requests.post(GOOGLE_SCRIPT_URL, json=payload, timeout=10)
+        print(f"Cadastro - Status: {response.status_code}, Resposta: {response.text}")
         return True
-    except:
+    except Exception as e:
+        print(f"Erro no cadastro: {e}")
         return False
 
 
@@ -36,7 +39,7 @@ def salvar_resumo_google_sheets(resumo: dict):
         percentual = (contagem / total) * 100
 
     percentual_formatado = f"{percentual:.2f}%".replace(".", ",")
-    conclusao = "Apto" if percentual >= 75 else "Nao Apto"
+    conclusao = "Apto" if percentual >= 75 else "Não Apto"
 
     payload = {
         "tipo": "resumo",
@@ -49,8 +52,12 @@ def salvar_resumo_google_sheets(resumo: dict):
         "conclusao": conclusao
     }
 
+    print(f"Enviando resumo: {payload}")  # Debug
+
     try:
-        requests.post(GOOGLE_SCRIPT_URL, json=payload, timeout=10)
+        response = requests.post(GOOGLE_SCRIPT_URL, json=payload, timeout=10)
+        print(f"Resumo - Status: {response.status_code}, Resposta: {response.text}")
         return True
-    except:
+    except Exception as e:
+        print(f"Erro no resumo: {e}")
         return False
