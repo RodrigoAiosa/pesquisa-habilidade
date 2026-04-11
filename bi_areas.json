@@ -1,6 +1,6 @@
 {
   "Análise de Dados": {
-    "requisitos": [
+    "✅requisitos": [
       { "nome": "SQL", "prioridade": "alta" },
       { "nome": "Python", "prioridade": "alta" },
       { "nome": "Excel Avançado", "prioridade": "alta" },
