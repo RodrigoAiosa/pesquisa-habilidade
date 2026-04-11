@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import json
 from io import BytesIO
-
+import time
 from validators import validar_email, validar_celular
 from google_api import salvar_google_sheets, salvar_resumo_google_sheets
 
