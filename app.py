@@ -188,7 +188,7 @@ elif st.session_state.etapa == 2:
                     if item_str in st.session_state.habilidades_selecionadas[cat]:
                         st.session_state.habilidades_selecionadas[cat].remove(item_str)
 
-    if st.button("📥 Gerar Relatório"):
+    if st.button("📥 Enviar"):
 
         excel, total, marcadas, porcentagem = gerar_excel(
             area,
