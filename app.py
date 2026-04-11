@@ -221,3 +221,4 @@ elif st.session_state.etapa == 2:
             "relatorio.xlsx",
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
+        resetar_app()
