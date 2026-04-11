@@ -91,6 +91,15 @@ def gerar_excel(area, dados, habilidades):
 
 
 # ==============================
+# FUNÇÃO PARA EXTRAIR TEXTO
+# ==============================
+def get_nome_item(item):
+    if isinstance(item, dict):
+        return item.get("nome", "")
+    return str(item)
+
+
+# ==============================
 # TELA 1
 # ==============================
 if st.session_state.etapa == 1:
@@ -167,8 +176,7 @@ elif st.session_state.etapa == 2:
 
             for item in itens:
 
-                # 🔥 garante string (corrige erro)
-                item_str = str(item)
+                item_str = get_nome_item(item)
 
                 key = f"{area}_{cat}_{item_str}"
                 checked = st.checkbox(item_str, key=key)
