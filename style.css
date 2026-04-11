@@ -1,36 +1,8 @@
 /* ==============================
-🌌 BASE - Streamlit específico
+🌌 BASE
 ============================== */
-
-/* Força o fundo em toda a página do Streamlit */
-.stApp {
-  background-image: url('rh.jpg');
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  background-repeat: no-repeat;
-}
-
-/* Overlay escuro para melhor contraste */
-.stApp::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.65);
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* Garante que todo conteúdo fique acima do overlay */
-.main > div {
-  position: relative;
-  z-index: 1;
-}
-
 body {
+  background-color: #0f0f0f;
   color: wheat;
   font-family: Arial, sans-serif;
 }
@@ -57,10 +29,6 @@ body {
   align-items: stretch;
 
   box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
-  
-  /* Fundo semi-transparente para melhor legibilidade */
-  background: rgba(33, 33, 33, 0.85);
-  backdrop-filter: blur(8px);
 }
 
 
@@ -105,7 +73,7 @@ h1, h2, h3 {
 
   padding: 0 12px !important;
 
-  background-color: rgba(0, 0, 0, 0.3) !important;
+  background-color: transparent !important;
   color: wheat !important;
 
   border: none !important;
@@ -126,13 +94,13 @@ h1, h2, h3 {
 ============================== */
 .stTextInput>div>div>input:hover,
 .stSelectbox>div>div>select:hover {
-  background-color: rgba(66, 66, 66, 0.8) !important;
+  background-color: #424242;
 }
 
 .stTextInput>div>div>input:focus,
 .stSelectbox>div>div>select:focus {
   border-bottom: 1px solid #ffffff;
-  background-color: rgba(42, 42, 42, 0.8) !important;
+  background-color: #2a2a2a;
 }
 
 
@@ -235,15 +203,4 @@ label {
 ============================== */
 .block-container:hover {
   box-shadow: 0 0 60px rgba(255, 255, 255, 0.05);
-}
-
-/* Remove o fundo branco padrão do Streamlit */
-header, footer {
-  background: transparent !important;
-}
-
-/* Ajuste para sidebar se existir */
-[data-testid="stSidebar"] {
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(10px);
 }
