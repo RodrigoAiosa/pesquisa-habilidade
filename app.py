@@ -100,6 +100,16 @@ def get_nome_item(item):
 
 
 # ==============================
+# FUNÇÃO PARA RESETAR APP
+# ==============================
+def resetar_app():
+    st.session_state.etapa = 1
+    st.session_state.dados_candidato = {}
+    st.session_state.habilidades_selecionadas = {}
+    st.session_state.relatorio_gerado = False
+
+
+# ==============================
 # TELA 1
 # ==============================
 if st.session_state.etapa == 1:
@@ -221,4 +231,7 @@ elif st.session_state.etapa == 2:
             "relatorio.xlsx",
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
+        
+        # VOLTA AUTOMATICAMENTE PARA TELA INICIAL
         resetar_app()
+        st.rerun()
