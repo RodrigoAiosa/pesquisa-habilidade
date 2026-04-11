@@ -7,7 +7,6 @@ def validar_email(email: str) -> bool:
     padrao = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     return re.match(padrao, email) is not None
 
-
 def validar_celular(celular: str) -> bool:
     """
     Valida celular no formato brasileiro
