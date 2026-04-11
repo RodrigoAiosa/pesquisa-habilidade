@@ -6,81 +6,81 @@
       { "nome": "Excel Avançado", "prioridade": "alta" },
       { "nome": "Power BI", "prioridade": "alta" }
     ],
-    "diferenciais": [
+    "📝diferenciais": [
       { "nome": "Estatística", "prioridade": "media" },
       { "nome": "Storytelling com Dados", "prioridade": "media" },
       { "nome": "ETL", "prioridade": "media" }
     ],
-    "soft_skills": [
+    "🔗soft_skills": [
       { "nome": "Comunicação", "prioridade": "alta" },
       { "nome": "Pensamento Analítico", "prioridade": "alta" }
     ]
   },
 
   "Business Intelligence (BI)": {
-    "requisitos": [
+    "✅requisitos": [
       { "nome": "Power BI", "prioridade": "alta" },
       { "nome": "Modelagem de Dados", "prioridade": "alta" },
       { "nome": "DAX", "prioridade": "alta" },
       { "nome": "SQL", "prioridade": "alta" }
     ],
-    "diferenciais": [
+    "📝diferenciais": [
       { "nome": "Data Warehouse", "prioridade": "media" },
       { "nome": "ETL", "prioridade": "media" },
       { "nome": "Governança de Dados", "prioridade": "media" }
     ],
-    "soft_skills": [
+    "🔗soft_skills": [
       { "nome": "Visão de Negócio", "prioridade": "alta" },
       { "nome": "Organização", "prioridade": "alta" }
     ]
   },
 
   "Engenharia de Dados": {
-    "requisitos": [
+    "✅requisitos": [
       { "nome": "Python", "prioridade": "alta" },
       { "nome": "SQL", "prioridade": "alta" },
       { "nome": "ETL", "prioridade": "alta" },
       { "nome": "Banco de Dados", "prioridade": "alta" }
     ],
-    "diferenciais": [
+    "📝diferenciais": [
       { "nome": "Spark", "prioridade": "media" },
       { "nome": "Airflow", "prioridade": "media" },
       { "nome": "Cloud (AWS/GCP/Azure)", "prioridade": "media" }
     ],
-    "soft_skills": [
+    "🔗soft_skills": [
       { "nome": "Raciocínio Lógico", "prioridade": "alta" },
       { "nome": "Resolução de Problemas", "prioridade": "alta" }
     ]
   },
 
   "Ciência de Dados": {
-    "requisitos": [
+    "✅requisitos": [
       { "nome": "Python", "prioridade": "alta" },
       { "nome": "Estatística", "prioridade": "alta" },
       { "nome": "Machine Learning", "prioridade": "alta" }
     ],
-    "diferenciais": [
+    "📝diferenciais": [
       { "nome": "Deep Learning", "prioridade": "media" },
       { "nome": "NLP", "prioridade": "media" },
       { "nome": "MLOps", "prioridade": "media" }
     ],
-    "soft_skills": [
+    "🔗soft_skills": [
       { "nome": "Curiosidade", "prioridade": "alta" },
       { "nome": "Pensamento Crítico", "prioridade": "alta" }
     ]
   },
 
   "Analytics Engineer": {
-    "requisitos": [
+    "✅requisitos": [
       { "nome": "SQL", "prioridade": "alta" },
       { "nome": "dbt", "prioridade": "alta" },
       { "nome": "Modelagem de Dados", "prioridade": "alta" }
     ],
-    "diferenciais": [
+    "📝diferenciais": [
       { "nome": "Data Warehouse", "prioridade": "media" },
       { "nome": "Versionamento (Git)", "prioridade": "media" }
     ],
-    "soft_skills": [
+    "🔗soft_skills": [
       { "nome": "Organização", "prioridade": "alta" },
       { "nome": "Documentação", "prioridade": "alta" }
     ]
