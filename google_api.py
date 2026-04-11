@@ -49,8 +49,8 @@ def salvar_resumo_google_sheets(resumo: dict):
         "area": resumo.get("area"),
         "habilidades_marcadas": habilidades_str,
         "contagem_habilidades_marcada": contagem,
-        "total": resumo.get("total"),              # ✅ agora preenche
-        "conclusao": conclusao                     # ✅ agora preenche
+        "total_habilidade": contagem,              
+        "conclusao": resumo.get("total")                     
     }
 
     try:
