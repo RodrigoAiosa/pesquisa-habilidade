@@ -225,13 +225,14 @@ elif st.session_state.etapa == 2:
 
         st.success("Dados enviados com sucesso!")
 
-        st.download_button(
-            "⬇️ Baixar Excel",
-            excel,
-            "relatorio.xlsx",
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
+        # st.download_button(
+        #     "⬇️ Baixar Excel",
+        #     excel,
+        #     "relatorio.xlsx",
+        #     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        # )
         
         # VOLTA AUTOMATICAMENTE PARA TELA INICIAL
+        time.sleep(3)
         resetar_app()
         st.rerun()
