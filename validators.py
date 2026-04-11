@@ -1,7 +1,3 @@
-"""
-Arquivo: validators.py
-Função: Validar e-mail e celular com regex
-"""
 import re
 
 def validar_email(email: str) -> bool:
